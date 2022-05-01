@@ -102,7 +102,6 @@ user_input = args.prompt+'.mp3'
 
 
 
-
 import pygame
  
 # importing sys module
@@ -124,13 +123,22 @@ while True:
         if event.type == pygame.QUIT:
             pygame.quit()
             sys.exit()
-         
+
+
+
         # checking if keydown event happened or not
         if event.type == pygame.KEYDOWN:
            
             # if keydown event happened
             # than printing a string to output
-            print(event.unicode)
+            #print(event.unicode)
+
+            with  open("MyFile.txt", "r") as file:
+                current = file.read()
+
+            with  open("MyFile.txt", "w+") as file:
+                content = str(event.unicode)
+                file.writelines(current + content +'\n')
 
             if event.key == pygame.K_SPACE:
                 mixer.init()
@@ -149,3 +157,4 @@ while True:
                 print("D")
             elif event.key==pygame.K_RIGHT:
                 print("R")
+
