@@ -1,22 +1,17 @@
-todo:
-
-me:
-	create new github repo
-	make todo list for hatice
 
 hatice:
-	clone this repo https://github.com/tjthejuggler/lightmote_seq
-	copy the contents of this(litemote_seq.txt) file into a todo.txt file in the lightmote_seq repo
-	download an mp3 and put it into the project folder
-	in main.py
-		play the .mp3 file with python code
-		download another .mp3
-		make an argument that allows the user to name one of the .mp3 files and make it play automatically
-		check to see which OS is being using
-		it allows for keyboard input (msvcrt for windows, getch for linux)
-			(it is possibly better to use tkinter instead of msvcrt/getch)
-			dont play the song file until the first keypress
-			hook up a keypress to pause the song
+
+          instead of printing letters, save them to a text file
+          instead of letters, save the appropriate rgb codes based on letters pressed
+          save song timestamps with rgb codes
+              all in json format
+                  {
+                      10: [[255,0,0],[0,255,0],[0,255,0]],
+                      22: [[255,0,0],[0,255,0],[0,255,0]],
+                  }
+
+
+
 			translates that keyboard input into lists which are associated with timestamps in a dict
 				row 1 - ball 1
 				row q - ball 2
@@ -27,8 +22,8 @@ hatice:
 		output is a text file json
 			the same as the promgen_artists_formatted.txt
 
-			When you get to the part in the to-do list about arguments you can look at 
-ddex/promgen.py to see some code about how to do it. You will want the 
-users argument to be a string because they will be giving an mp3 name 
-as the argument. To play the mp3 in python you have to Google for example 
-code. No worries if you get stuck
+        eventually
+          show live color bars in pygame as keys are pressed
+          file browser to choose song
+          seperate file browser to select previously created sequence
+
