@@ -26,3 +26,9 @@ hatice:
 						[255,0,0],[255,255,0],[0,255,0],[0,255,255].... (actually we will have more partial colors in beteen these)
 		output is a text file json
 			the same as the promgen_artists_formatted.txt
+
+			When you get to the part in the to-do list about arguments you can look at 
+ddex/promgen.py to see some code about how to do it. You will want the 
+users argument to be a string because they will be giving an mp3 name 
+as the argument. To play the mp3 in python you have to Google for example 
+code. No worries if you get stuck
