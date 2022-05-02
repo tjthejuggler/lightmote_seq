@@ -26,4 +26,18 @@ hatice:
           show live color bars in pygame as keys are pressed
           file browser to choose song
           seperate file browser to select previously created sequence
+          ability to fade between colors by use to mod key(ctl, alt, shift..)
+          strobe ability
+          	off/color strobe simplest, but also complicated multi-color strobes
 
+new todo:
+	make pygame window larger(large width especially important)
+	show song name at the top of the pygame window
+		show song length
+	button to open filebrowser for song (this button should be next to the song name)
+	progress bar for song playback
+		basically a line in a long rectangle that moves across the screen as the timestamp of the song increases
+		look for a few different ways that people do this before choosing one
+	under progress bar make 3 long empty rectangle bars
+		these bars will be filled with rectangle bars as color keys are pressed
+	button to open file browser for text file
