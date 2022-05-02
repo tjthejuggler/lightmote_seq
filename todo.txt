@@ -1,12 +1,6 @@
 
 hatice:
-	
-	save to text fıle that has same name as song
-		ıf text fıle already exısts then add a (1) after the fılename
-		
-		musıc1.txt
-		musıc1(1).txt
-		musıc1(2).txt
+
 
 
         eventually
@@ -18,7 +12,6 @@ hatice:
           	off/color strobe simplest, but also complicated multi-color strobes
 
 new todo:
-	make pygame window larger(large width especially important)
 	show song name at the top of the pygame window
 		show song length
 	button to open filebrowser for song (this button should be next to the song name)
