@@ -18,6 +18,7 @@ hatice:
           	off/color strobe simplest, but also complicated multi-color strobes
 
 new todo:
+	add another row for white - 8 i k ,
 	make pygame window larger(large width especially important)
 	show song name at the top of the pygame window
 		show song length
