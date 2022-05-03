@@ -1,10 +1,12 @@
 import time
 from pygame import mixer
 import argparse
+import os
 from os import path
 import json
 import pygame
 import sys
+from mutagen.mp3 import MP3
 
 key_colors={}
 
@@ -12,7 +14,7 @@ if path.exists('./key_color.txt'):
 	#print('file exists')		
 	with open('./key_color.txt') as json_file:
 		key_colors = json.load(json_file)
-		
+
 parser = argparse.ArgumentParser()
 parser.add_argument("prompt", help="the base prompt (comma seperate each weighted section")
 #parser.add_argument("songname", help="enter the name of the song")
@@ -22,16 +24,35 @@ user_input = args.prompt
 
 pygame.init()
 
+def show_details():
+
+	#file_data=os.path.splitext(user_input)
+	total_length=0
+	#if file_data[1] == '.mp3':
+	audio = MP3(user_input+'.mp3')
+	total_length=audio.info.length
+	print("its me")
+	mins,secs=divmod(total_length,60)
+	mins=round(mins)
+	secs=round(secs)
+	timeformat='{:02d}:{:02d}'.format(mins,secs)
+	
+	return timeformat
+
 # creating display
 display = pygame.display.set_mode((800, 600))
 pygame.display.set_caption('Juggling Balls')
 clock = pygame.time.Clock()
 # basic font for user typed
 font_color=(0,150,250)
+#songLength = (user_input+'.mp3').length
 base_font = pygame.font.Font(None, 32)
-text_obj=base_font.render(user_input,True,font_color)
+text_obj=base_font.render(user_input+'  '+show_details(),True,font_color)
 # create rectangle
 #input_rect = pygame.Rect(200, 200, 140, 32)
+
+
+
 
 def create_file():
 	file_name=''
