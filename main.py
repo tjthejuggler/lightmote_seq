@@ -31,7 +31,6 @@ def show_details():
 	#if file_data[1] == '.mp3':
 	audio = MP3(user_input+'.mp3')
 	total_length=audio.info.length
-	print("its me")
 	mins,secs=divmod(total_length,60)
 	mins=round(mins)
 	secs=round(secs)
@@ -50,7 +49,6 @@ base_font = pygame.font.Font(None, 32)
 text_obj=base_font.render(user_input+'  '+show_details(),True,font_color)
 # create rectangle
 #input_rect = pygame.Rect(200, 200, 140, 32)
-
 
 
 
