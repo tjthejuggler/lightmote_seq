@@ -8,6 +8,7 @@ import pygame
 import sys
 from mutagen.mp3 import MP3
 
+
 key_colors={}
 
 if path.exists('./key_color.txt'):	
@@ -46,11 +47,47 @@ clock = pygame.time.Clock()
 font_color=(0,150,250)
 #songLength = (user_input+'.mp3').length
 base_font = pygame.font.Font(None, 32)
-text_obj=base_font.render(user_input+'  '+show_details(),True,font_color)
+#text_obj=base_font.render(user_input+'  '+show_details(),True,font_color)
+text_obj=base_font.render(show_details(),True,font_color)
+# pygame.draw.rect(display, (0,250,0),(150,450,100,50))
+# pygame.draw.rect(display, red,(550,450,100,50))
 # create rectangle
 #input_rect = pygame.Rect(200, 200, 140, 32)
 
+class button():
+	def __init__(self, color, x,y, width,height, text=''):
+		self.color=color
+		self.x=x
+		self.y=y
+		self.width=width
+		self.height=height
+		self.text=text
 
+	def draw(self,win,outline=None):
+	#Call this method to draw the button on the screen
+		if outline:
+			pygame.draw.rect (display, outline, (self.x-2,self.y-2,self.width+4,self.height+4),0)
+			pygame.draw.rect (display, self.color, (self.x,self.y,self.width,self.height),0)
+
+		if self.text != '':
+			font = pygame.font.SysFont ('comicsans', 15)
+			text = font.render (self.text, 1, (0,0,0))
+			display.blit(text, (self.x + (self.width/2 - text.get_width()/2), self.y + (self.height/2 - text.get_height()/2)))
+	
+	def isOver(self, pos):
+	#Pos is the mouse position or a tuple of (x,y) coordinates
+		if pos[0] > self.x and pos[0] < self.x + self.width:
+			if pos[1] > self.y and pos[1] < self.y + self.height:
+				return True
+	
+			return False
+
+# def redrawWindow():
+# 	#display.fill((255,255,255))
+# 	greenButton.draw (display, (0,0,0))
+	
+
+greenButton = button((0,255,0), 20, 5, 80, 30, user_input+'.mp3')
 
 def create_file():
 	file_name=''
@@ -70,13 +107,19 @@ def create_file():
 
 def main():
 # creating a running loop
+	#redrawWindow()	
+	pygame.display.update()
 	display.fill((255,255,255))
-	display.blit(text_obj,(22,0))
+	display.blit(text_obj,(110,10))
+	greenButton.draw (display, (0,0,0))
 	while True:
-
+		
 		# creating a loop to check events that
 		# are occuring
 		for event in pygame.event.get():
+
+			pos = pygame.mouse.get_pos()
+
 			if event.type == pygame.QUIT:
 				pygame.quit()
 				sys.exit()
@@ -117,5 +160,14 @@ def main():
 						current = file.read()
 					with  open(file_name, "w") as file:
 						file.writelines(current[:-2] + '\n}')
+				
+			if event.type == pygame.MOUSEBUTTONDOWN:
+				if greenButton.isOver(pos):
+					print ('clicked the button')
+			if event.type == pygame.MOUSEMOTION:
+				if greenButton.isOver(pos):
+					greenButton.color = (255,0,0)
+				else:
+					greenButton.color = (0,255,0)
 
 main()
