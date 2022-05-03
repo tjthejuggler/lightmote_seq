@@ -7,9 +7,15 @@ import json
 import pygame
 import sys
 from mutagen.mp3 import MP3
+#from tkinter import filedialog as fd
+import tkinter
+import tkinter.filedialog
+import pygame
 
 
 key_colors={}
+
+#filename = fd.askopenfilename()
 
 if path.exists('./key_color.txt'):	
 	#print('file exists')		
@@ -24,6 +30,15 @@ args = parser.parse_args()
 user_input = args.prompt
 
 pygame.init()
+
+def prompt_file():
+    #"""Create a Tk file dialog and cleanup when finished"""
+    top = tkinter.Tk()
+    top.withdraw()  # hide window
+    file_name = tkinter.filedialog.askopenfilename(parent=top)
+    top.destroy()
+    return file_name
+
 
 def show_details():
 
@@ -48,7 +63,7 @@ font_color=(0,150,250)
 #songLength = (user_input+'.mp3').length
 base_font = pygame.font.Font(None, 32)
 #text_obj=base_font.render(user_input+'  '+show_details(),True,font_color)
-text_obj=base_font.render(show_details(),True,font_color)
+# text_obj=base_font.render(show_details(),True,font_color)
 # pygame.draw.rect(display, (0,250,0),(150,450,100,50))
 # pygame.draw.rect(display, red,(550,450,100,50))
 # create rectangle
@@ -109,17 +124,22 @@ def main():
 # creating a running loop
 	#redrawWindow()	
 	pygame.display.update()
-	display.fill((255,255,255))
-	display.blit(text_obj,(110,10))
 	greenButton.draw (display, (0,0,0))
+	f = "<No File Selected>"
+	song_length =show_details()
 	while True:
-		
+		display.fill((255,255,255))
+		text_obj=base_font.render(song_length,True,font_color)
+		#text_time=base_font.render(timestamp,True,font_color)
+		display.blit(text_obj,(110,10))
+		#display.blit(text_time,(200,10))
+		greenButton.draw (display, (0,0,0))
+
 		# creating a loop to check events that
 		# are occuring
 		for event in pygame.event.get():
 
 			pos = pygame.mouse.get_pos()
-
 			if event.type == pygame.QUIT:
 				pygame.quit()
 				sys.exit()
@@ -129,7 +149,8 @@ def main():
 			
 				# if keydown event happened
 				# than printing a string to output
-				#print(event.unicode)   
+				#print(event.unicode) 
+ 
 				current=''
 				timestamp=''
 				content=''
@@ -142,7 +163,7 @@ def main():
 						content = key_colors[str(event.unicode)]
 						timestamp = str(pygame.mixer.music.get_pos())
 						file.writelines(current + '"' + timestamp + '" : "' + content + '",\n')
-					
+
 				
 				if event.key == pygame.K_SPACE and not mixer.music.get_busy():
 					mixer.init()
@@ -163,7 +184,23 @@ def main():
 				
 			if event.type == pygame.MOUSEBUTTONDOWN:
 				if greenButton.isOver(pos):
-					print ('clicked the button')
+					#print ('clicked the button')
+					path_of_user_selected_file = prompt_file()
+					user_selected_file = path_of_user_selected_file.split("/")[-1]
+					greenButton.text = user_selected_file
+					# greenButton = button((0,255,0), 20, 5, 80, 30, f)
+					# greenButton.draw (display, (0,0,0))
+					print (f)
+					total_length=0
+					#if file_data[1] == '.mp3':
+					audio = MP3(user_selected_file)
+					total_length=audio.info.length
+					mins,secs=divmod(total_length,60)
+					mins=round(mins)
+					secs=round(secs)
+					song_length='{:02d}:{:02d}'.format(mins,secs)
+					# display.blit(text_obj,(110,10))
+					# text_obj=base_font.render(timeformat,True,font_color)
 			if event.type == pygame.MOUSEMOTION:
 				if greenButton.isOver(pos):
 					greenButton.color = (255,0,0)
