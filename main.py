@@ -1,4 +1,5 @@
 import time
+from numpy import timedelta64
 from pygame import mixer
 import argparse
 import os
@@ -11,7 +12,7 @@ from mutagen.mp3 import MP3
 import tkinter
 import tkinter.filedialog
 import pygame
-
+import tkinter.ttk as ttk
 
 key_colors={}
 
@@ -30,6 +31,12 @@ args = parser.parse_args()
 user_input = args.prompt
 
 pygame.init()
+
+# def slide():
+# 	pass
+# #create music position slider
+# my_slider=ttk.Scale(from_=0,to=100,orient=tkinter.HORIZONTAL,value=0,command=slide)
+# my_slider.pack(pady=20)	
 
 def prompt_file():
     #"""Create a Tk file dialog and cleanup when finished"""
@@ -55,13 +62,14 @@ def show_details():
 	return timeformat
 
 # creating display
-display = pygame.display.set_mode((800, 600))
+display = pygame.display.set_mode((1200, 300))
 pygame.display.set_caption('Juggling Balls')
 clock = pygame.time.Clock()
 # basic font for user typed
 font_color=(0,150,250)
 #songLength = (user_input+'.mp3').length
 base_font = pygame.font.Font(None, 32)
+
 #text_obj=base_font.render(user_input+'  '+show_details(),True,font_color)
 # text_obj=base_font.render(show_details(),True,font_color)
 # pygame.draw.rect(display, (0,250,0),(150,450,100,50))
@@ -83,6 +91,15 @@ class button():
 		if outline:
 			pygame.draw.rect (display, outline, (self.x-2,self.y-2,self.width+4,self.height+4),0)
 			pygame.draw.rect (display, self.color, (self.x,self.y,self.width,self.height),0)
+			pygame.draw.rect (display, outline, (20-2,50-2,1150+4,30+4),0)
+			pygame.draw.rect(display, (255,255,255), (20, 50, 1150, 30))
+			pygame.draw.rect (display, outline, (20-2,100-2,1150+4,30+4),0)
+			pygame.draw.rect(display, (255,255,255), (20, 100, 1150, 30))
+			pygame.draw.rect (display, outline, (20-2,150-2,1150+4,30+4),0)
+			pygame.draw.rect(display, (255,255,255), (20, 150, 1150, 30))
+			pygame.draw.rect (display, outline, (20-2,200-2,1150+4,30+4),0)
+			pygame.draw.rect(display, (255,255,255), (20, 200, 1150, 30))
+			#pygame.draw.line(display, (255,0,0),(22, 50), (22, 80), 5)
 
 		if self.text != '':
 			font = pygame.font.SysFont ('comicsans', 15)
@@ -104,17 +121,19 @@ class button():
 
 greenButton = button((0,255,0), 20, 5, 80, 30, user_input+'.mp3')
 
-def create_file():
+
+
+def create_file(song_name):
 	file_name=''
 	count=0
 	looking_for_file=True
 	while looking_for_file:
-				
-		if path.exists(user_input +'('+str(count)+').txt'):	
+			
+		if path.exists('./texts/'+ song_name +'('+str(count)+').txt'):	
 			count+=1
 		else:
 			looking_for_file=False
-			file_name=user_input +'('+str(count)+').txt'
+			file_name='./texts/'+song_name +'('+str(count)+').txt'
 			open(file_name, "w") 
 
 	return file_name
@@ -123,18 +142,30 @@ def create_file():
 def main():
 # creating a running loop
 	#redrawWindow()	
+	
+	# Drawing Rectangle
+	
 	pygame.display.update()
 	greenButton.draw (display, (0,0,0))
 	f = "<No File Selected>"
 	song_length =show_details()
+	current_song_name=user_input
 	while True:
+		total_length_ex=pygame.mixer.music.get_pos()
+		seconds = (total_length_ex / 1000) % 60 
+		minutes = ((total_length_ex / (1000*60)) % 60)
+		#mins,secs=divmod(total_length_ex,3600)
+		mins=round(minutes)
+		secs=round(seconds)
+		calibration='{:02d}:{:02d}'.format(mins,secs)
 		display.fill((255,255,255))
 		text_obj=base_font.render(song_length,True,font_color)
-		#text_time=base_font.render(timestamp,True,font_color)
-		display.blit(text_obj,(110,10))
-		#display.blit(text_time,(200,10))
+		text_time=base_font.render(calibration,True,font_color)
+		display.blit(text_obj,(180,10))
+		display.blit(text_time,(110,10))
 		greenButton.draw (display, (0,0,0))
-
+		pygame.draw.line(display, (255,0,0),(22+secs, 50), (22+secs, 80), 5)
+		pygame.display.update()
 		# creating a loop to check events that
 		# are occuring
 		for event in pygame.event.get():
@@ -143,7 +174,7 @@ def main():
 			if event.type == pygame.QUIT:
 				pygame.quit()
 				sys.exit()
-			pygame.display.update()
+			#pygame.display.update()
 			# checking if keydown event happened or not
 			if event.type == pygame.KEYDOWN:
 			
@@ -164,13 +195,13 @@ def main():
 						timestamp = str(pygame.mixer.music.get_pos())
 						file.writelines(current + '"' + timestamp + '" : "' + content + '",\n')
 
-				
+								
 				if event.key == pygame.K_SPACE and not mixer.music.get_busy():
 					mixer.init()
-					mixer.music.load(user_input+'.mp3')
+					mixer.music.load(current_song_name+'.mp3')
 					mixer.music.set_volume(0.8)
 					mixer.music.play()
-					file_name=create_file()
+					file_name=create_file(current_song_name)
 					with  open(file_name, "w") as file:
 						line=['{\n']
 						file.writelines(line)
@@ -188,6 +219,13 @@ def main():
 					path_of_user_selected_file = prompt_file()
 					user_selected_file = path_of_user_selected_file.split("/")[-1]
 					greenButton.text = user_selected_file
+					pygame.mixer.music.pause()
+					current_song_name=user_selected_file.split(".mp3")[0]
+					# mixer.init()
+					# mixer.music.load(user_selected_file)
+					# mixer.music.set_volume(0.8)
+					# mixer.music.play()
+					file_name=create_file(current_song_name)
 					# greenButton = button((0,255,0), 20, 5, 80, 30, f)
 					# greenButton.draw (display, (0,0,0))
 					print (f)
