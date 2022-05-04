@@ -13,8 +13,12 @@ import tkinter
 import tkinter.filedialog
 import pygame
 import tkinter.ttk as ttk
+import math 
 
 key_colors={}
+bar_length=1150
+bar_start_position=20
+total_length=1
 
 #filename = fd.askopenfilename()
 
@@ -48,7 +52,7 @@ def prompt_file():
 
 
 def show_details():
-
+	global total_length
 	#file_data=os.path.splitext(user_input)
 	total_length=0
 	#if file_data[1] == '.mp3':
@@ -91,14 +95,14 @@ class button():
 		if outline:
 			pygame.draw.rect (display, outline, (self.x-2,self.y-2,self.width+4,self.height+4),0)
 			pygame.draw.rect (display, self.color, (self.x,self.y,self.width,self.height),0)
-			pygame.draw.rect (display, outline, (20-2,50-2,1150+4,30+4),0)
-			pygame.draw.rect(display, (255,255,255), (20, 50, 1150, 30))
-			pygame.draw.rect (display, outline, (20-2,100-2,1150+4,30+4),0)
-			pygame.draw.rect(display, (255,255,255), (20, 100, 1150, 30))
-			pygame.draw.rect (display, outline, (20-2,150-2,1150+4,30+4),0)
-			pygame.draw.rect(display, (255,255,255), (20, 150, 1150, 30))
-			pygame.draw.rect (display, outline, (20-2,200-2,1150+4,30+4),0)
-			pygame.draw.rect(display, (255,255,255), (20, 200, 1150, 30))
+			pygame.draw.rect (display, outline, (bar_start_position-2,50-2,bar_length+4,30+4),0)
+			pygame.draw.rect(display, (255,255,255), (bar_start_position, 50, bar_length, 30))
+			pygame.draw.rect (display, outline, (bar_start_position-2,100-2,bar_length+4,30+4),0)
+			pygame.draw.rect(display, (255,255,255), (bar_start_position, 100, bar_length, 30))
+			pygame.draw.rect (display, outline, (bar_start_position-2,150-2,bar_length+4,30+4),0)
+			pygame.draw.rect(display, (255,255,255), (bar_start_position, 150, bar_length, 30))
+			pygame.draw.rect (display, outline, (bar_start_position-2,200-2,bar_length+4,30+4),0)
+			pygame.draw.rect(display, (255,255,255), (bar_start_position, 200, bar_length, 30))
 			#pygame.draw.line(display, (255,0,0),(22, 50), (22, 80), 5)
 
 		if self.text != '':
@@ -121,7 +125,11 @@ class button():
 
 greenButton = button((0,255,0), 20, 5, 80, 30, user_input+'.mp3')
 
+def get_line_position(current_song_timestamp,total_length):
 
+	percent_through_song = (current_song_timestamp)/(total_length)
+	line_position = (percent_through_song * bar_length)+bar_start_position
+	return line_position
 
 def create_file(song_name):
 	file_name=''
@@ -144,27 +152,28 @@ def main():
 	#redrawWindow()	
 	
 	# Drawing Rectangle
-	
+	global total_length
 	pygame.display.update()
 	greenButton.draw (display, (0,0,0))
 	f = "<No File Selected>"
 	song_length =show_details()
 	current_song_name=user_input
 	while True:
-		total_length_ex=pygame.mixer.music.get_pos()
-		seconds = (total_length_ex / 1000) % 60 
-		minutes = ((total_length_ex / (1000*60)) % 60)
-		#mins,secs=divmod(total_length_ex,3600)
-		mins=round(minutes)
-		secs=round(seconds)
-		calibration='{:02d}:{:02d}'.format(mins,secs)
+		total_length_ex=pygame.mixer.music.get_pos()/1000
+		minutes = total_length_ex/60
+		seconds = total_length_ex %60
+		print(total_length_ex,minutes,seconds)
+		mins=math.floor(minutes)
+		secs=math.floor(seconds)
+		calibration= str(mins)+ ":"+str(secs)#  '{:02d}:{:02d}'.format(minutes,seconds)
 		display.fill((255,255,255))
 		text_obj=base_font.render(song_length,True,font_color)
 		text_time=base_font.render(calibration,True,font_color)
 		display.blit(text_obj,(180,10))
 		display.blit(text_time,(110,10))
 		greenButton.draw (display, (0,0,0))
-		pygame.draw.line(display, (255,0,0),(22+secs, 50), (22+secs, 80), 5)
+		line_position=get_line_position(total_length_ex,total_length)
+		pygame.draw.line(display, (255,0,0),(line_position, 50), (line_position, 80), 5)
 		pygame.display.update()
 		# creating a loop to check events that
 		# are occuring
@@ -229,7 +238,7 @@ def main():
 					# greenButton = button((0,255,0), 20, 5, 80, 30, f)
 					# greenButton.draw (display, (0,0,0))
 					print (f)
-					total_length=0
+					
 					#if file_data[1] == '.mp3':
 					audio = MP3(user_selected_file)
 					total_length=audio.info.length
