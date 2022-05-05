@@ -1,8 +1,6 @@
 
 hatice:
 8ik, - white  
-
-
         eventually
           show live color bars in pygame as keys are pressed
           file browser to choose song

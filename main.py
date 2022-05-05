@@ -16,9 +16,25 @@ import tkinter.ttk as ttk
 import math 
 
 key_colors={}
+color_codes={}
 bar_length=1150
 bar_start_position=20
 total_length=1
+temporary_color_codes={
+"3938" : "y,x,y",
+"13659" : "x,r,x",
+"24195" : "x,y,x",
+"34709" : "x,o,x",
+"44982" : "x,x,x",
+"55435" : "x,x,x",
+"85800" : "x,x,x",
+"76112" : "x,y,x",
+"86123" : "x,g,x",
+"96419" : "x,c,x",
+"206000": "r,r,r"
+}
+
+
 
 #filename = fd.askopenfilename()
 
@@ -26,6 +42,12 @@ if path.exists('./key_color.txt'):
 	#print('file exists')		
 	with open('./key_color.txt') as json_file:
 		key_colors = json.load(json_file)
+
+if path.exists('./color_codes.txt'):	
+	#print('file exists')		
+	with open('./color_codes.txt') as json_file:
+		color_codes = json.load(json_file)
+
 
 parser = argparse.ArgumentParser()
 parser.add_argument("prompt", help="the base prompt (comma seperate each weighted section")
@@ -80,6 +102,54 @@ base_font = pygame.font.Font(None, 32)
 # pygame.draw.rect(display, red,(550,450,100,50))
 # create rectangle
 #input_rect = pygame.Rect(200, 200, 140, 32)
+
+
+class color_rect():
+	def __init__(self, color, x,y,length):
+		self.color=color
+		self.x=x
+		self.y=y
+		self.length=length
+
+	def draw(self,win):
+		outline=(255,255,255)
+	#Call this method to draw the button on the screen
+		# pygame.draw.rect (display, outline, (self.x-2,self.y-2,self.width+4,self.height+4),0)
+		# pygame.draw.rect (display, self.color, (self.x,self.y,self.width,self.height),0)
+		# pygame.draw.rect (display, outline, (bar_start_position-2,50-2,bar_length+4,30+4),0)
+		# pygame.draw.rect(display, (255,255,255), (bar_start_position, 50, bar_length, 30))
+		# pygame.draw.rect (display, outline, (bar_start_position-2,100-2,bar_length+4,30+4),0)
+		# pygame.draw.rect(display, (255,255,255), (bar_start_position, 100, bar_length, 30))
+		# pygame.draw.rect (display, outline, (bar_start_position-2,150-2,bar_length+4,30+4),0)
+		# pygame.draw.rect(display, (255,255,255), (bar_start_position, 150, bar_length, 30))
+		pygame.draw.rect (display, outline, (self.x-2,self.y-2,self.length+4,30+4),0)
+		pygame.draw.rect(display, self.color, (self.x, self.y, self.length, 30))
+		#pygame.draw.line(display, (255,0,0),(22, 50), (22, 80), 5)
+
+def draw_color_rects():
+	previous_end_xs = [20,20,20]
+	previous_colors=['k','k','k']
+	sortedlist=[(k,temporary_color_codes[k]) for k in sorted(temporary_color_codes)]
+	for key in temporary_color_codes:
+		value = temporary_color_codes[key]
+		for ball_number,color_letter in enumerate(value.split(",")):
+			if color_letter!='x':	
+				this_rgb_code=tuple(map(int,color_codes[previous_colors[ball_number]].split(",")))
+				y_cord =0
+				if ball_number==0:
+					y_cord = 100
+				if ball_number==1:
+					y_cord = 150
+				if ball_number==2:
+					y_cord = 200
+				this_length = get_line_position(float(key)/1000,total_length)
+				min_length = min(this_length,bar_length-previous_end_xs[ball_number]+22)
+				this_color_rect = color_rect(this_rgb_code, previous_end_xs[ball_number], y_cord,min_length)
+				previous_end_xs[ball_number] = this_length
+				previous_colors[ball_number] = color_letter
+				this_color_rect.draw(display)
+
+
 
 class button():
 	def __init__(self, color, x,y, width,height, text=''):
@@ -146,6 +216,14 @@ def create_file(song_name):
 
 	return file_name
 
+def make_color_rect(ball_numbers,colors,color_rect_list,line_position):
+
+	pygame.draw.rect(display, (255,255,255), (bar_start_position, 100, bar_length, 30))
+	pygame.draw.rect(display, (255,255,255), (bar_start_position, 150, bar_length, 30))
+	pygame.draw.rect(display, (255,255,255), (bar_start_position, 200, bar_length, 30))
+
+
+	return color_rect_list
 
 def main():
 # creating a running loop
@@ -156,23 +234,24 @@ def main():
 	pygame.display.update()
 	greenButton.draw (display, (0,0,0))
 	f = "<No File Selected>"
-	song_length =show_details()
+	formatted_song_length =show_details()
 	current_song_name=user_input
 	while True:
-		total_length_ex=pygame.mixer.music.get_pos()/1000
-		minutes = total_length_ex/60
-		seconds = total_length_ex %60
-		print(total_length_ex,minutes,seconds)
-		mins=math.floor(minutes)
-		secs=math.floor(seconds)
-		calibration= str(mins)+ ":"+str(secs)#  '{:02d}:{:02d}'.format(minutes,seconds)
+		current_time_in_secs=pygame.mixer.music.get_pos()/1000
+		minutes = math.floor(current_time_in_secs/60)
+		seconds = math.floor(current_time_in_secs %60)
+		formatted_current_time='{:02d}:{:02d}'.format(minutes,seconds)
 		display.fill((255,255,255))
-		text_obj=base_font.render(song_length,True,font_color)
-		text_time=base_font.render(calibration,True,font_color)
+		text_obj=base_font.render(formatted_song_length,True,font_color)
+		text_time=base_font.render(formatted_current_time,True,font_color)
+		if formatted_current_time==formatted_song_length:
+			formatted_current_time=='{:00}:{:00}'
 		display.blit(text_obj,(180,10))
 		display.blit(text_time,(110,10))
-		greenButton.draw (display, (0,0,0))
-		line_position=get_line_position(total_length_ex,total_length)
+		greenButton.draw(display, (0,0,0))
+		draw_color_rects()
+		#green.draw(display)
+		line_position=get_line_position(current_time_in_secs,total_length)
 		pygame.draw.line(display, (255,0,0),(line_position, 50), (line_position, 80), 5)
 		pygame.display.update()
 		# creating a loop to check events that
@@ -243,9 +322,9 @@ def main():
 					audio = MP3(user_selected_file)
 					total_length=audio.info.length
 					mins,secs=divmod(total_length,60)
-					mins=round(mins)
-					secs=round(secs)
-					song_length='{:02d}:{:02d}'.format(mins,secs)
+					mins=math.floor(mins)
+					secs=math.floor(secs)
+					formatted_song_length='{:02d}:{:02d}'.format(mins,secs)
 					# display.blit(text_obj,(110,10))
 					# text_obj=base_font.render(timeformat,True,font_color)
 			if event.type == pygame.MOUSEMOTION:
