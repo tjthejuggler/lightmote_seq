@@ -21,7 +21,7 @@ bar_length=1150
 bar_start_position=20
 total_length=1
 temporary_color_codes={
-
+"1":"k,k,k"
 }
 
 
@@ -112,19 +112,16 @@ class color_rect():
 		# pygame.draw.rect(display, (255,255,255), (bar_start_position, 100, bar_length, 30))
 		# pygame.draw.rect (display, outline, (bar_start_position-2,150-2,bar_length+4,30+4),0)
 		# pygame.draw.rect(display, (255,255,255), (bar_start_position, 150, bar_length, 30))
-		pygame.draw.rect (display, outline, (self.x-2,self.y-2,self.length+4,30+4),0)
+		#pygame.draw.rect (display, outline, (self.x-2,self.y-2,self.length+4,30+4),0)
 		pygame.draw.rect(display, self.color, (self.x, self.y, self.length, 30))
 		#pygame.draw.line(display, (255,0,0),(22, 50), (22, 80), 5)
 
 def draw_color_rects():
-	previous_end_xs = [20,20,20]
-	previous_colors=['k','k','k']
-	sortedlist=[(k,temporary_color_codes[k]) for k in sorted(temporary_color_codes)]
 	for key in temporary_color_codes:
 		value = temporary_color_codes[key]
 		for ball_number,color_letter in enumerate(value.split(",")):
 			if color_letter!='x':	
-				this_rgb_code=tuple(map(int,color_codes[previous_colors[ball_number]].split(",")))
+				this_rgb_code=tuple(map(int,color_codes[color_letter].split(",")))
 				y_cord =0
 				if ball_number==0:
 					y_cord = 100
@@ -132,11 +129,9 @@ def draw_color_rects():
 					y_cord = 150
 				if ball_number==2:
 					y_cord = 200
-				this_length = get_line_position(float(key)/1000,total_length)
-				min_length = min(this_length,bar_length-previous_end_xs[ball_number]+22)
-				this_color_rect = color_rect(this_rgb_code, previous_end_xs[ball_number], y_cord,min_length)
-				previous_end_xs[ball_number] = this_length
-				previous_colors[ball_number] = color_letter
+				line_position=get_line_position(float(key)/1000,total_length)
+				this_length = (bar_length+20)-line_position
+				this_color_rect = color_rect(this_rgb_code, line_position, y_cord,this_length)
 				this_color_rect.draw(display)
 
 
@@ -184,6 +179,8 @@ class button():
 	
 
 greenButton = button((0,255,0), 20, 5, 80, 30, user_input+'.mp3')
+textButton = button((0,255,0), 1090, 5, 80, 30, user_input+'.txt')
+	
 
 def get_line_position(current_song_timestamp,total_length):
 
@@ -222,7 +219,6 @@ def main():
 	# Drawing Rectangle
 	global total_length
 	pygame.display.update()
-	greenButton.draw (display, (0,0,0))
 	f = "<No File Selected>"
 	formatted_song_length =show_details()
 	current_song_name=user_input
@@ -240,6 +236,7 @@ def main():
 		display.blit(text_obj,(180,10))
 		display.blit(text_time,(110,10))
 		greenButton.draw(display, (0,0,0))
+		textButton.draw (display, (0,0,0))
 		draw_color_rects()
 		#green.draw(display)
 		line_position=get_line_position(current_time_in_secs,total_length)
@@ -301,24 +298,15 @@ def main():
 					greenButton.text = user_selected_file
 					pygame.mixer.music.pause()
 					current_song_name=user_selected_file.split(".mp3")[0]
-					# mixer.init()
-					# mixer.music.load(user_selected_file)
-					# mixer.music.set_volume(0.8)
-					# mixer.music.play()
 					file_name=create_file(current_song_name)
-					# greenButton = button((0,255,0), 20, 5, 80, 30, f)
-					# greenButton.draw (display, (0,0,0))
 					print (f)
-					
-					#if file_data[1] == '.mp3':
 					audio = MP3(user_selected_file)
 					total_length=audio.info.length
 					mins,secs=divmod(total_length,60)
 					mins=math.floor(mins)
 					secs=math.floor(secs)
 					formatted_song_length='{:02d}:{:02d}'.format(mins,secs)
-					# display.blit(text_obj,(110,10))
-					# text_obj=base_font.render(timeformat,True,font_color)
+
 			if event.type == pygame.MOUSEMOTION:
 				if greenButton.isOver(pos):
 					greenButton.color = (255,0,0)
