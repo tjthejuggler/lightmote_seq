@@ -21,17 +21,7 @@ bar_length=1150
 bar_start_position=20
 total_length=1
 temporary_color_codes={
-"3938" : "y,x,y",
-"13659" : "x,r,x",
-"24195" : "x,y,x",
-"34709" : "x,o,x",
-"44982" : "x,x,x",
-"55435" : "x,x,x",
-"85800" : "x,x,x",
-"76112" : "x,y,x",
-"86123" : "x,g,x",
-"96419" : "x,c,x",
-"206000": "r,r,r"
+
 }
 
 
@@ -242,6 +232,7 @@ def main():
 		seconds = math.floor(current_time_in_secs %60)
 		formatted_current_time='{:02d}:{:02d}'.format(minutes,seconds)
 		display.fill((255,255,255))
+		draw_color_rects()
 		text_obj=base_font.render(formatted_song_length,True,font_color)
 		text_time=base_font.render(formatted_current_time,True,font_color)
 		if formatted_current_time==formatted_song_length:
@@ -282,6 +273,7 @@ def main():
 						content = key_colors[str(event.unicode)]
 						timestamp = str(pygame.mixer.music.get_pos())
 						file.writelines(current + '"' + timestamp + '" : "' + content + '",\n')
+						temporary_color_codes[timestamp] = content
 
 								
 				if event.key == pygame.K_SPACE and not mixer.music.get_busy():
