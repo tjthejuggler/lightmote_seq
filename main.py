@@ -14,15 +14,20 @@ import tkinter.filedialog
 import pygame
 import tkinter.ttk as ttk
 import math 
+from socket import *
+import struct
+
+udp_header = struct.pack("!bIBH", 66, 0, 0, 0)
+s = socket(AF_INET, SOCK_DGRAM)
+ball_size = 120
 
 key_colors={}
 color_codes={}
+hex_color_codes={}
 bar_length=1150
 bar_start_position=20
 total_length=1
-temporary_color_codes={
-"1":"k,k,k"
-}
+
 
 
 
@@ -37,6 +42,11 @@ if path.exists('./color_codes.txt'):
 	#print('file exists')		
 	with open('./color_codes.txt') as json_file:
 		color_codes = json.load(json_file)
+
+if path.exists('./hex_color_codes.txt'):	
+	#print('file exists')		
+	with open('./hex_color_codes.txt') as json_file:
+		hex_color_codes = json.load(json_file)
 
 
 parser = argparse.ArgumentParser()
@@ -53,6 +63,23 @@ pygame.init()
 # #create music position slider
 # my_slider=ttk.Scale(from_=0,to=100,orient=tkinter.HORIZONTAL,value=0,command=slide)
 # my_slider.pack(pady=20)	
+default_colors = ["#000000","#FFFFFF","#FF0000","#00FF00","#0000FF","#FFFF00","#00FFFF","#FF00FF","#00FFFF","#FF00FF"]
+
+def change_real_color(color_key, ball_number):
+	hex_color = hex_color_codes[color_key]
+	ip=''
+	if ball_number==0:
+		ip="85"#81,19,172,35,237,85,23,240
+	if ball_number==1:
+		ip="81"#81,19,172,35,237,85,23,240
+	if ball_number==2:
+		ip="19"#81,19,172,35,237,85,23,240	
+	rgb = tuple(int(hex_color.lstrip('#')[i:i+2], 16) for i in (0, 2, 4))
+	data = struct.pack("!BBBB", 0x0a, rgb[0], rgb[1], rgb[2])
+	s.sendto(udp_header+data, ('192.168.43.'+ip, 41412))
+	print("ball with ip "+ ip + " " + hex_color )
+
+
 
 def prompt_file():
     #"""Create a Tk file dialog and cleanup when finished"""
@@ -61,6 +88,7 @@ def prompt_file():
     file_name = tkinter.filedialog.askopenfilename(parent=top)
     top.destroy()
     return file_name
+
 
 
 def show_details():
@@ -116,9 +144,10 @@ class color_rect():
 		pygame.draw.rect(display, self.color, (self.x, self.y, self.length, 30))
 		#pygame.draw.line(display, (255,0,0),(22, 50), (22, 80), 5)
 
-def draw_color_rects():
+def draw_color_rects(temporary_color_codes):
 	for key in temporary_color_codes:
 		value = temporary_color_codes[key]
+		print(key)
 		for ball_number,color_letter in enumerate(value.split(",")):
 			if color_letter!='x':	
 				this_rgb_code=tuple(map(int,color_codes[color_letter].split(",")))
@@ -218,6 +247,9 @@ def main():
 	
 	# Drawing Rectangle
 	global total_length
+	temporary_color_codes={
+	"1":"k,k,k"
+	}
 	pygame.display.update()
 	f = "<No File Selected>"
 	formatted_song_length =show_details()
@@ -228,7 +260,6 @@ def main():
 		seconds = math.floor(current_time_in_secs %60)
 		formatted_current_time='{:02d}:{:02d}'.format(minutes,seconds)
 		display.fill((255,255,255))
-		draw_color_rects()
 		text_obj=base_font.render(formatted_song_length,True,font_color)
 		text_time=base_font.render(formatted_current_time,True,font_color)
 		if formatted_current_time==formatted_song_length:
@@ -237,13 +268,14 @@ def main():
 		display.blit(text_time,(110,10))
 		greenButton.draw(display, (0,0,0))
 		textButton.draw (display, (0,0,0))
-		draw_color_rects()
 		#green.draw(display)
+		draw_color_rects(temporary_color_codes)
 		line_position=get_line_position(current_time_in_secs,total_length)
 		pygame.draw.line(display, (255,0,0),(line_position, 50), (line_position, 80), 5)
 		pygame.display.update()
 		# creating a loop to check events that
 		# are occuring
+
 		for event in pygame.event.get():
 
 			pos = pygame.mouse.get_pos()
@@ -271,6 +303,10 @@ def main():
 						timestamp = str(pygame.mixer.music.get_pos())
 						file.writelines(current + '"' + timestamp + '" : "' + content + '",\n')
 						temporary_color_codes[timestamp] = content
+					
+						for ball_number,color_key in enumerate(content.split(",")):
+							if color_key!='x':
+								change_real_color(color_key,ball_number)	
 
 								
 				if event.key == pygame.K_SPACE and not mixer.music.get_busy():
@@ -306,6 +342,17 @@ def main():
 					mins=math.floor(mins)
 					secs=math.floor(secs)
 					formatted_song_length='{:02d}:{:02d}'.format(mins,secs)
+				if textButton.isOver(pos):
+					path_of_user_selected_file = prompt_file()
+					user_selected_file = path_of_user_selected_file.split("/")[-1]
+					textButton.text = user_selected_file.split(".txt")[0]
+					#temporary_color_codes=(user_selected_file_2.split(".txt")[0])
+					if path.exists(path_of_user_selected_file):	
+						#print('file exists')		
+						with open(path_of_user_selected_file) as json_file:
+							temporary_color_codes = json.load(json_file)
+							
+							
 
 			if event.type == pygame.MOUSEMOTION:
 				if greenButton.isOver(pos):
