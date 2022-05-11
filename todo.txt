@@ -16,6 +16,8 @@ new todo:
 	under progress bar make 3 long empty rectangle bars
 		these bars will be filled with rectangle bars as color keys are pressed
 	button to open file browser for text file
+	a button that restarts the program but just clear the colors gives us a new textfile
+	if text file is empty then dont create it delete or something
 
 new new todo:
 	3 circles that show current colors of the balls
@@ -24,3 +26,8 @@ new new todo:
 eventually:
 	we should be able to fade from one color to another using a modifier key like ctrl
 	figure out how we want to handle strobing
+
+bug:
+
+	before pushing the space if we push some other keys its crushing
+	(we dont want it to crash)
