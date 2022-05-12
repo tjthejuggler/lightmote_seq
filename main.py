@@ -198,7 +198,7 @@ class button():
 		self.text=text
 
 	def draw(self,win,outline=None):
-	#Call this method to draw the button on the screen
+	#Call this method to draw the button on the screen 20 50 1150 30 
 		if outline:
 			pygame.draw.rect (display, outline, (self.x-2,self.y-2,self.width+4,self.height+4),0)
 			pygame.draw.rect (display, self.color, (self.x,self.y,self.width,self.height),0)
@@ -244,6 +244,12 @@ def get_line_position(current_song_timestamp,total_length):
 	percent_through_song = (current_song_timestamp)/(total_length)
 	line_position = (percent_through_song * bar_length)+bar_start_position
 	return line_position
+
+def get_song_position(x,total_length):
+	x_position=(x-20)
+	song_multiplier=x_position/bar_length
+	return(song_multiplier*total_length)
+
 
 def create_file(song_name):
 	file_name=''
@@ -298,9 +304,10 @@ def main():
 	formatted_song_length =show_details()
 	current_song_name=user_input
 	label = myfont.render(current_song_name, 1, (0,0,0))
+	song_offset = 0
 	while True:
 		temporary_color_codes = sort_dict(temporary_color_codes)
-		current_time_in_secs=pygame.mixer.music.get_pos()/1000
+		current_time_in_secs=song_offset + pygame.mixer.music.get_pos()/1000
 		minutes = math.floor(current_time_in_secs/60)
 		seconds = math.floor(current_time_in_secs %60)
 		formatted_current_time='{:02d}:{:02d}'.format(minutes,seconds)
@@ -330,6 +337,7 @@ def main():
 		for event in pygame.event.get():
 
 			pos = pygame.mouse.get_pos()
+			
 			if event.type == pygame.QUIT:
 				#print(file_name)
 				pygame.quit()
@@ -353,7 +361,7 @@ def main():
 					# 	current = file.read()
 					# with open(file_name, "w+") as file:
 					content = key_colors[str(event.unicode)]
-					timestamp = str(pygame.mixer.music.get_pos())
+					timestamp = str(int(song_offset*1000) + pygame.mixer.music.get_pos())
 					# 	file.writelines(current + '"' + timestamp + '" : "' + content + '",\n')
 					temporary_color_codes[timestamp] = content
 					
@@ -458,4 +466,10 @@ def main():
 				else:
 					greenButton.color = (0,255,0)
 
+			if event.type == pygame.MOUSEBUTTONUP:
+				x,y=pos
+				if 20<x<1170 and 50<y<80:
+					print(pos)
+					pygame.mixer.music.play(0,(get_song_position(x,total_length)))
+					song_offset = get_song_position(x,total_length)
 main()
