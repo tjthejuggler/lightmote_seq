@@ -1,38 +1,29 @@
 
-hatice:
-          ability to fade between colors by use to mod key(ctl, alt, shift..)
-          strobe ability
-          	off/color strobe simplest, but also complicated multi-color strobes
-
-new todo:
-
-
-	a button that restarts the program but just clear the colors gives us a new textfile
-    close the current file and save if its not empty 
-    stop the song 
-    
-
-	if text file is empty then dont create it delete or something
-
 
 eventually:
 	we should be able to fade from one color to another using a modifier key like ctrl
-	figure out how we want to handle strobing
+    figure out how to use ctrl
+  strobe ability
+    off/color strobe simplest, but also complicated multi-color strobes
+
+
+
+
+
 
 bug:
 	when we load a text file and then add new key presses it doesnt save the original key colors
-  if we save with no file name it crash
+      when we load a text file immediately set our temporary dictionary to be the text file we loaded 
+  if we save with no file name ın the dıalog it crash with load too probavlr
+  when we press save file button its crashing if there is no name
+  if we dont chose anything in save button its crushing
+  if we havent done save as it crushes 
 
-
-text input for filename with a save button
-  maybe thıs ısnt neededö   
-  
-  maybe a save fıle dıalog ıs an optıon
-                                ıf you fınd thıs the fırst step ıs just be able to save    
-
-make a button
-hook ıt up to a save fıle dıalog
-make the contents of the saved fıle be " thıs ıs a test "
-
-
-our current txt button gets labled LOAD
+todo
+	 line should move with mouse
+    detect mouse down and print the xy coordinates of the curser(mouse)
+    check the see if that xy is inside our line bar 
+        if it is then move the line to that x position and music should play from the new time
+   when we restart line should go to zero 
+   we should have a pause for the music(we should change the space bar to pause music and stay at 
+   current timestampt)

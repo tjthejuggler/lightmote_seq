@@ -280,6 +280,10 @@ def compare_current_time(temporary_color_codes,current_time_in_secs,color_circle
 	
 	return color_circle_colors
 
+def sort_dict(my_dict):
+    sorted_dict = sorted(my_dict.items(), key=lambda x: int(x[0]))
+    return dict(sorted_dict)
+
 def main():
 # creating a running loop
 	#redrawWindow()	
@@ -295,6 +299,7 @@ def main():
 	current_song_name=user_input
 	label = myfont.render(current_song_name, 1, (0,0,0))
 	while True:
+		temporary_color_codes = sort_dict(temporary_color_codes)
 		current_time_in_secs=pygame.mixer.music.get_pos()/1000
 		minutes = math.floor(current_time_in_secs/60)
 		seconds = math.floor(current_time_in_secs %60)
@@ -343,19 +348,19 @@ def main():
 				if pygame.key.get_mods() & pygame.KMOD_LCTRL:
 					print ("pressed: ctrl + "+pygame.key.name(event.key))
 				if str(event.unicode) in key_colors and mixer.music.get_busy():
-					print(str(event))
-					with open(file_name, "r") as file:
-						current = file.read()
-					with open(file_name, "w+") as file:
-						content = key_colors[str(event.unicode)]
-						timestamp = str(pygame.mixer.music.get_pos())
-						file.writelines(current + '"' + timestamp + '" : "' + content + '",\n')
-						temporary_color_codes[timestamp] = content
+					# print(str(event))
+					# with open(file_name, "r") as file:
+					# 	current = file.read()
+					# with open(file_name, "w+") as file:
+					content = key_colors[str(event.unicode)]
+					timestamp = str(pygame.mixer.music.get_pos())
+					# 	file.writelines(current + '"' + timestamp + '" : "' + content + '",\n')
+					temporary_color_codes[timestamp] = content
 					
-						for ball_number,color_letter in enumerate(content.split(",")):
-							if color_letter!='x':
-								change_real_color(color_letter,ball_number)
-								color_circle_colors[ball_number]=color_letter
+					for ball_number,color_letter in enumerate(content.split(",")):
+						if color_letter!='x':
+							change_real_color(color_letter,ball_number)
+							color_circle_colors[ball_number]=color_letter
 				
 				# if event.key == pygame.K_LCTRL:
 				# 	print("ctrl is pressed")
@@ -370,7 +375,7 @@ def main():
 					mixer.music.load(current_song_name+'.mp3')
 					mixer.music.set_volume(0.8)
 					mixer.music.play()
-					file_name=create_file(current_song_name)
+					#file_name=create_file(current_song_name)
 					# with  open(file_name, "w") as file:
 					# 	line=['{\n']
 					# 	file.writelines(line)
@@ -418,7 +423,7 @@ def main():
 					with open(f.name, 'w') as fp:
 						json.dump(temporary_color_codes, fp,indent = 6)
 						label = myfont.render(f.name.split(".txt")[0].split("/")[-1], 1, (0,0,0))
-						out_file.close()
+						fp.close()
 				
 				if saveButton.isOver(pos):
 					with open(f.name, 'w') as fp:
