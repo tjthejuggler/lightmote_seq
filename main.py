@@ -17,6 +17,10 @@ import tkinter.ttk as ttk
 import math 
 from socket import *
 import struct
+from tkinter.filedialog import asksaveasfile
+from tkinter import *
+
+
 
 udp_header = struct.pack("!bIBH", 66, 0, 0, 0)
 s = socket(AF_INET, SOCK_DGRAM)
@@ -65,6 +69,7 @@ pygame.init()
 # my_slider.pack(pady=20)	
 
 
+	
 	
 
 def change_real_color(color_key, ball_number):
@@ -115,6 +120,10 @@ clock = pygame.time.Clock()
 font_color=(0,150,250)
 #songLength = (user_input+'.mp3').length
 base_font = pygame.font.Font(None, 32)
+myfont = pygame.font.SysFont("comicsans", 20)
+
+# render text
+
 
 #text_obj=base_font.render(user_input+'  '+show_details(),True,font_color)
 # text_obj=base_font.render(show_details(),True,font_color)
@@ -222,7 +231,8 @@ class button():
 	
 
 greenButton = button((0,255,0), 20, 5, 80, 30, user_input+'.mp3')
-textButton = button((0,255,0), 1090, 5, 80, 30, user_input+'.txt')
+textButton = button((0,255,0), 1090, 5, 80, 30, 'LOAD')
+saveButton=button((0,255,0), 980, 5, 80, 30, 'save files')
 	
 
 def get_line_position(current_song_timestamp,total_length):
@@ -279,6 +289,7 @@ def main():
 	f = "<No File Selected>"
 	formatted_song_length =show_details()
 	current_song_name=user_input
+	label = myfont.render(current_song_name, 1, (0,0,0))
 	while True:
 		current_time_in_secs=pygame.mixer.music.get_pos()/1000
 		minutes = math.floor(current_time_in_secs/60)
@@ -291,8 +302,10 @@ def main():
 			formatted_current_time=='{:00}:{:00}'
 		display.blit(text_obj,(180,10))
 		display.blit(text_time,(110,10))
+		display.blit(label, (840, 10))
 		greenButton.draw(display, (0,0,0))
 		textButton.draw (display, (0,0,0))
+		saveButton.draw (display, (0,0,0))
 		#green.draw(display)
 		draw_color_rects(temporary_color_codes)
 		draw_color_circles(color_circle_colors)
@@ -392,14 +405,19 @@ def main():
 				if textButton.isOver(pos):
 					path_of_user_selected_file = prompt_file()
 					user_selected_file = path_of_user_selected_file.split("/")[-1]
-					textButton.text = user_selected_file.split(".txt")[0]
+					label = myfont.render(user_selected_file.split(".txt")[0], 1, (0,0,0))
+					#textButton.text = user_selected_file.split(".txt")[0]
 					#temporary_color_codes=(user_selected_file_2.split(".txt")[0])
 					if path.exists(path_of_user_selected_file):	
 						#print('file exists')		
 						with open(path_of_user_selected_file) as json_file:
 							temporary_color_codes = json.load(json_file)
-							
-							
+				if saveButton.isOver(pos):
+					f = asksaveasfile(initialfile = 'Untitled.txt',defaultextension=".txt",filetypes=[("All Files","*.*"),("Text Documents","*.txt")])
+					print('f.name',f.name)
+					with open(f.name, 'w') as fp:
+						json.dump(temporary_color_codes, fp)
+						label = myfont.render(f.name.split(".txt")[0].split("/")[-1], 1, (0,0,0))		
 
 			if event.type == pygame.MOUSEMOTION:
 				if greenButton.isOver(pos):

@@ -1,33 +1,38 @@
 
 hatice:
-8ik, - white  
-        eventually
-          show live color bars in pygame as keys are pressed
-          file browser to choose song
-          seperate file browser to select previously created sequence
           ability to fade between colors by use to mod key(ctl, alt, shift..)
           strobe ability
           	off/color strobe simplest, but also complicated multi-color strobes
 
 new todo:
-	progress bar for song playback
-		basically a line in a long rectangle that moves across the screen as the timestamp of the song increases
-		look for a few different ways that people do this before choosing one
-	under progress bar make 3 long empty rectangle bars
-		these bars will be filled with rectangle bars as color keys are pressed
-	button to open file browser for text file
+
+
 	a button that restarts the program but just clear the colors gives us a new textfile
+    close the current file and save if its not empty 
+    stop the song 
+    
+
 	if text file is empty then dont create it delete or something
 
-new new todo:
-	3 circles that show current colors of the balls
-	when song is played and there is a text file loaded, it should send real color commands to the balls
 
 eventually:
 	we should be able to fade from one color to another using a modifier key like ctrl
 	figure out how we want to handle strobing
 
 bug:
+	when we load a text file and then add new key presses it doesnt save the original key colors
+  if we save with no file name it crash
 
-	before pushing the space if we push some other keys its crushing
-	(we dont want it to crash)
+
+text input for filename with a save button
+  maybe thıs ısnt neededö   
+  
+  maybe a save fıle dıalog ıs an optıon
+                                ıf you fınd thıs the fırst step ıs just be able to save    
+
+make a button
+hook ıt up to a save fıle dıalog
+make the contents of the saved fıle be " thıs ıs a test "
+
+
+our current txt button gets labled LOAD
