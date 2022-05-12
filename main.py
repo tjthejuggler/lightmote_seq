@@ -1,4 +1,5 @@
 import colorsys
+from pdb import Restart
 import time
 from numpy import timedelta64
 from pygame import mixer
@@ -231,8 +232,11 @@ class button():
 	
 
 greenButton = button((0,255,0), 20, 5, 80, 30, user_input+'.mp3')
-textButton = button((0,255,0), 1090, 5, 80, 30, 'LOAD')
-saveButton=button((0,255,0), 980, 5, 80, 30, 'save files')
+loadButton = button((0,255,0), 1090, 5, 80, 30, 'LOAD')
+saveasButton=button((0,255,0), 980, 5, 80, 30, 'Save As')
+saveButton=button((0,255,0), 870, 5, 80, 30, 'Save')
+restartButton=button((0,255,0), 1090, 250, 80, 30, 'Restart')
+
 	
 
 def get_line_position(current_song_timestamp,total_length):
@@ -302,10 +306,12 @@ def main():
 			formatted_current_time=='{:00}:{:00}'
 		display.blit(text_obj,(180,10))
 		display.blit(text_time,(110,10))
-		display.blit(label, (840, 10))
+		display.blit(label, (760, 6))
 		greenButton.draw(display, (0,0,0))
-		textButton.draw (display, (0,0,0))
+		loadButton.draw (display, (0,0,0))
+		saveasButton.draw (display, (0,0,0))
 		saveButton.draw (display, (0,0,0))
+		restartButton.draw (display, (0,0,0))
 		#green.draw(display)
 		draw_color_rects(temporary_color_codes)
 		draw_color_circles(color_circle_colors)
@@ -320,26 +326,13 @@ def main():
 
 			pos = pygame.mouse.get_pos()
 			if event.type == pygame.QUIT:
-				print(file_name)
-				with open(file_name, "r") as file:
-						current = file.read()
-						if os.path.getsize(file_name) == 0:
-							file.close()
-							os.remove(file_name)
-						else:
-							print('File is not empty')
-							with  open(file_name, "w") as file:
-								if current[0]!='{':
-									file.writelines('{\n'+ current[:-2] + '\n}')
-								else:
-									file.writelines(current[:-2] + '\n}')
-
+				#print(file_name)
 				pygame.quit()
 				sys.exit()
 			#pygame.display.update()
 			# checking if keydown event happened or not
 			if event.type == pygame.KEYDOWN:
-			
+				
 				# if keydown event happened
 				# than printing a string to output
 				#print(event.unicode) 
@@ -347,9 +340,10 @@ def main():
 				current=''
 				timestamp=''
 				content=''
-
+				if pygame.key.get_mods() & pygame.KMOD_LCTRL:
+					print ("pressed: ctrl + "+pygame.key.name(event.key))
 				if str(event.unicode) in key_colors and mixer.music.get_busy():
-
+					print(str(event))
 					with open(file_name, "r") as file:
 						current = file.read()
 					with open(file_name, "w+") as file:
@@ -362,8 +356,14 @@ def main():
 							if color_letter!='x':
 								change_real_color(color_letter,ball_number)
 								color_circle_colors[ball_number]=color_letter
-
+				
+				# if event.key == pygame.K_LCTRL:
+				# 	print("ctrl is pressed")
+					# keys = pygame.key.get_pressed()
+					# if keys[pygame.K_LCTRL] and keys[pygame.K_f]:
+					# 	print("ctrl AND F are pressed")
 			
+
 								
 				if event.key == pygame.K_SPACE and not mixer.music.get_busy():
 					mixer.init()
@@ -377,13 +377,13 @@ def main():
 					#while mixer.music.get_busy():
 				elif event.key == pygame.K_SPACE and mixer.music.get_busy():
 					pygame.mixer.music.pause()
-					if os.path.getsize(file_name) != 0:
-						with  open(file_name, "r") as file:
-							current = file.read()
-						with  open(file_name, "w") as file:
-							file.writelines('{\n'+ current[:-2] + '\n}')
-					else:
-						os.remove(file_name)
+					# if os.path.getsize(file_name) != 0:
+					# 	with  open(file_name, "r") as file:
+					# 		current = file.read()
+					# 	with  open(file_name, "w") as file:
+					# 		file.writelines('{\n'+ current[:-2] + '\n}')
+					# else:
+					# 	os.remove(file_name)
 
 				
 			if event.type == pygame.MOUSEBUTTONDOWN:
@@ -402,7 +402,7 @@ def main():
 					mins=math.floor(mins)
 					secs=math.floor(secs)
 					formatted_song_length='{:02d}:{:02d}'.format(mins,secs)
-				if textButton.isOver(pos):
+				if loadButton.isOver(pos):
 					path_of_user_selected_file = prompt_file()
 					user_selected_file = path_of_user_selected_file.split("/")[-1]
 					label = myfont.render(user_selected_file.split(".txt")[0], 1, (0,0,0))
@@ -412,12 +412,40 @@ def main():
 						#print('file exists')		
 						with open(path_of_user_selected_file) as json_file:
 							temporary_color_codes = json.load(json_file)
-				if saveButton.isOver(pos):
+				if saveasButton.isOver(pos):
 					f = asksaveasfile(initialfile = 'Untitled.txt',defaultextension=".txt",filetypes=[("All Files","*.*"),("Text Documents","*.txt")])
 					print('f.name',f.name)
 					with open(f.name, 'w') as fp:
+						json.dump(temporary_color_codes, fp,indent = 6)
+						label = myfont.render(f.name.split(".txt")[0].split("/")[-1], 1, (0,0,0))
+						out_file.close()
+				
+				if saveButton.isOver(pos):
+					with open(f.name, 'w') as fp:
 						json.dump(temporary_color_codes, fp)
-						label = myfont.render(f.name.split(".txt")[0].split("/")[-1], 1, (0,0,0))		
+					print(f.name)
+					if os.path.getsize(f.name) != 0:
+						with  open(f.name, "r") as file:
+							current = file.read()
+							if os.path.getsize(f.name) == 0:
+								file.close()
+								os.remove(f.name)
+							else:
+								print('File is not empty')
+								out_file = open(f.name, "w")
+  
+								json.dump(temporary_color_codes, out_file, indent = 6)
+								
+								out_file.close()
+
+				if restartButton.isOver(pos):
+					pygame.mixer.music.pause()
+					temporary_color_codes={
+					"1":"k,k,k"
+					}
+					color_circle_colors=["k","k","k"]
+
+					
 
 			if event.type == pygame.MOUSEMOTION:
 				if greenButton.isOver(pos):
