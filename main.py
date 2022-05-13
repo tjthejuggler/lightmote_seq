@@ -237,10 +237,11 @@ class button():
 
 loadSongButton = button((0,255,0), 20, 5, 80, 30, user_input+'.mp3')
 loadButton = button((0,255,0), 1090, 5, 80, 30, 'LOAD')
-saveasButton=button((0,255,0), 980, 5, 80, 30, 'Save As')
-saveButton=button((0,255,0), 870, 5, 80, 30, 'Save')
+#saveasButton=button((0,255,0), 980, 5, 80, 30, 'Save As')
+saveButton=button((0,255,0), 980, 5, 80, 30, 'Save')
 restartButton=button((0,255,0), 1090, 250, 80, 30, 'Restart')
-textinputButton=button((255,255,255), 900, 250, 160, 30, '')
+textinputButton=button((255,255,255), 790, 5, 160, 30, '')
+
 
 	
 
@@ -308,11 +309,12 @@ def main():
 	text_file = "<No File Selected>"
 	formatted_song_length =show_details()
 	current_song_name=user_input
-	label = myfont.render(current_song_name, 1, (0,0,0))
+	#label = myfont.render(current_song_name, 1, (0,0,0))
 	song_offset = 0
 	mixer.init()
 	mixer.music.load(current_song_name+'.mp3')
 	mixer.music.set_volume(0.8)
+	
 	while True:
 		# print("song_offset",song_offset)
 		# print("pygame.mixer.music.get_pos()",pygame.mixer.music.get_pos())
@@ -329,12 +331,12 @@ def main():
 			formatted_current_time=='{:00}:{:00}'
 		display.blit(text_obj,(180,10))
 		display.blit(text_time,(110,10))
-		display.blit(label, (760, 6))
+		#display.blit(label, (760, 6))
 		textinputButton.draw (display, (0,0,0))
-		display.blit(textinput.surface, (900, 254))
+		display.blit(textinput.surface, (790, 8))
 		loadSongButton.draw(display, (0,0,0))
 		loadButton.draw (display, (0,0,0))
-		saveasButton.draw (display, (0,0,0))
+		#saveasButton.draw (display, (0,0,0))
 		saveButton.draw (display, (0,0,0))
 		restartButton.draw (display, (0,0,0))
 
@@ -362,6 +364,7 @@ def main():
 			#pygame.display.update()
 			# checking if keydown event happened or not
 			if event.type == pygame.KEYDOWN:
+
 				if textinputButton.isOver(pos):
 					print('hatice')
 					textinput.update(events)
@@ -438,21 +441,23 @@ def main():
 				if loadButton.isOver(pos):
 					path_of_user_selected_file = prompt_file()
 					user_selected_file = path_of_user_selected_file.split("/")[-1]
-					label = myfont.render(user_selected_file.split(".txt")[0], 1, (0,0,0))
+					#label = myfont.render(user_selected_file.split(".txt")[0], 1, (0,0,0))
 					#textButton.text = user_selected_file.split(".txt")[0]
 					#temporary_color_codes=(user_selected_file_2.split(".txt")[0])
+					textinput.update(events)
+					textinput.value=user_selected_file.split(".txt")[0]
 					if path.exists(path_of_user_selected_file):	
 						#print('file exists')		
 						with open(path_of_user_selected_file) as json_file:
 							temporary_color_codes = json.load(json_file)
-				if saveasButton.isOver(pos):
-					text_file = asksaveasfile(initialfile = 'Untitled.txt',defaultextension=".txt",filetypes=[("All Files","*.*"),("Text Documents","*.txt")])
-					if text_file is not None:
-						print('text_file.name',text_file.name)
-						with open(text_file.name, 'w') as fp:
-							json.dump(temporary_color_codes, fp,indent = 6)
-							label = myfont.render(text_file.name.split(".txt")[0].split("/")[-1], 1, (0,0,0))
-							fp.close()
+				# if saveasButton.isOver(pos):
+				# 	text_file = asksaveasfile(initialfile = 'Untitled.txt',defaultextension=".txt",filetypes=[("All Files","*.*"),("Text Documents","*.txt")])
+				# 	if text_file is not None:
+				# 		print('text_file.name',text_file.name)
+				# 		with open(text_file.name, 'w') as fp:
+				# 			json.dump(temporary_color_codes, fp,indent = 6)
+				# 			label = myfont.render(text_file.name.split(".txt")[0].split("/")[-1], 1, (0,0,0))
+				# 			fp.close()
 				
 						
 				if saveButton.isOver(pos):
@@ -476,6 +481,8 @@ def main():
 
 				if restartButton.isOver(pos):
 					pygame.mixer.music.stop()
+					textinput.update(events)
+					textinput.value=''
 					temporary_color_codes={
 					"1":"k,k,k"
 					}

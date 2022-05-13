@@ -12,18 +12,9 @@ eventually:
 
 
 bug:
-	when we load a text file and then add new key presses it doesnt save the original key colors
-      when we load a text file immediately set our temporary dictionary to be the text file we loaded 
-  if we save with no file name ın the dıalog it crash with load too probavlr
-  when we press save file button its crashing if there is no name
-  if we dont chose anything in save button its crushing
-  if we havent done save as it crushes 
+when you change the music.mp3 file its not changinng and line is not going to zero
+when you restart you need to get rid of the things in text input
+make time -1.59 fix it
+when we load a file, the name of the file should be on textinput 
 
-todo
-	 line should move with mouse
-    detect mouse down and print the xy coordinates of the curser(mouse)
-    check the see if that xy is inside our line bar 
-        if it is then move the line to that x position and music should play from the new time
-   when we restart line should go to zero 
-   we should have a pause for the music(we should change the space bar to pause music and stay at 
-   current timestampt)
+
