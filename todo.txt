@@ -12,9 +12,5 @@ eventually:
 
 
 bug:
-when you change the music.mp3 file its not changinng and line is not going to zero
-when you restart you need to get rid of the things in text input
-make time -1.59 fix it
-when we load a file, the name of the file should be on textinput 
 
 

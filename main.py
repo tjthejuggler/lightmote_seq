@@ -108,7 +108,7 @@ def show_details():
 	#file_data=os.path.splitext(user_input)
 	total_length=0
 	#if file_data[1] == '.mp3':
-	audio = MP3(user_input+'.mp3')
+	audio = MP3('./MP3 Song File/'+user_input+'.mp3')
 	total_length=audio.info.length
 	mins,secs=divmod(total_length,60)
 	mins=round(mins)
@@ -312,7 +312,7 @@ def main():
 	#label = myfont.render(current_song_name, 1, (0,0,0))
 	song_offset = 0
 	mixer.init()
-	mixer.music.load(current_song_name+'.mp3')
+	mixer.music.load('./MP3 Song File/'+current_song_name+'.mp3')
 	mixer.music.set_volume(0.8)
 	
 	while True:
@@ -323,6 +323,8 @@ def main():
 		minutes = math.floor(current_time_in_secs/60)
 		seconds = math.floor(current_time_in_secs %60)
 		formatted_current_time='{:02d}:{:02d}'.format(minutes,seconds)
+		if formatted_current_time == "-1:59":
+			formatted_current_time = "00:00"
 		display.fill((255,255,255))
 		events=pygame.event.get()
 		text_obj=base_font.render(formatted_song_length,True,font_color)
@@ -365,9 +367,10 @@ def main():
 			# checking if keydown event happened or not
 			if event.type == pygame.KEYDOWN:
 
-				if textinputButton.isOver(pos):
-					print('hatice')
+				if textinputButton.isOver(pos) and not mixer.music.get_busy():
+					#print('hatice')
 					textinput.update(events)
+			
 				
 				# if keydown event happened
 				# than printing a string to output
@@ -425,19 +428,23 @@ def main():
 				
 			if event.type == pygame.MOUSEBUTTONDOWN:
 				if loadSongButton.isOver(pos):
-					#print ('clicked the button')
 					path_of_user_selected_file = prompt_file()
-					user_selected_file = path_of_user_selected_file.split("/")[-1]
-					loadSongButton.text = user_selected_file
-					pygame.mixer.music.pause()
-					current_song_name=user_selected_file.split(".mp3")[0]
-					file_name=create_file(current_song_name)
-					audio = MP3(user_selected_file)
-					total_length=audio.info.length
-					mins,secs=divmod(total_length,60)
-					mins=math.floor(mins)
-					secs=math.floor(secs)
-					formatted_song_length='{:02d}:{:02d}'.format(mins,secs)
+					#print ('clicked the button')
+					if path.exists(path_of_user_selected_file):	
+						user_selected_file = path_of_user_selected_file.split("/")[-1]
+						loadSongButton.text = user_selected_file
+						pygame.mixer.music.stop()
+						current_song_name=user_selected_file.split(".mp3")[0]
+						file_name=create_file(current_song_name)
+						audio = MP3(path_of_user_selected_file)
+						mixer.music.load(path_of_user_selected_file)
+						total_length=audio.info.length
+						mins,secs=divmod(total_length,60)
+						mins=math.floor(mins)
+						secs=math.floor(secs)
+						formatted_song_length='{:02d}:{:02d}'.format(mins,secs)
+						#pygame.mixer.music.stop()
+						song_offset=0
 				if loadButton.isOver(pos):
 					path_of_user_selected_file = prompt_file()
 					user_selected_file = path_of_user_selected_file.split("/")[-1]
