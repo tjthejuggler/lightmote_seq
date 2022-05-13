@@ -20,6 +20,7 @@ from socket import *
 import struct
 from tkinter.filedialog import asksaveasfile
 from tkinter import *
+import pygame_textinput
 
 
 
@@ -63,6 +64,9 @@ user_input = args.prompt
 
 pygame.init()
 
+text_input_font = pygame.font.SysFont("comicsans", 15)
+manager = pygame_textinput.TextInputManager(validator = lambda input: len(input) <= 19)
+textinput = pygame_textinput.TextInputVisualizer(manager=manager,font_object=text_input_font)
 # def slide():
 # 	pass
 # #create music position slider
@@ -209,7 +213,7 @@ class button():
 			pygame.draw.rect (display, outline, (bar_start_position-2,150-2,bar_length+4,30+4),0)
 			pygame.draw.rect(display, (255,255,255), (bar_start_position, 150, bar_length, 30))
 			pygame.draw.rect (display, outline, (bar_start_position-2,200-2,bar_length+4,30+4),0)
-			pygame.draw.rect(display, (255,255,255), (bar_start_position, 200, bar_length, 30))
+			pygame.draw.rect(display, (255,255,255), (bar_start_position, 200, bar_length, 30)),
 
 			#pygame.draw.line(display, (255,0,0),(22, 50), (22, 80), 5)
 
@@ -236,6 +240,7 @@ loadButton = button((0,255,0), 1090, 5, 80, 30, 'LOAD')
 saveasButton=button((0,255,0), 980, 5, 80, 30, 'Save As')
 saveButton=button((0,255,0), 870, 5, 80, 30, 'Save')
 restartButton=button((0,255,0), 1090, 250, 80, 30, 'Restart')
+textinputButton=button((255,255,255), 900, 250, 160, 30, '')
 
 	
 
@@ -317,6 +322,7 @@ def main():
 		seconds = math.floor(current_time_in_secs %60)
 		formatted_current_time='{:02d}:{:02d}'.format(minutes,seconds)
 		display.fill((255,255,255))
+		events=pygame.event.get()
 		text_obj=base_font.render(formatted_song_length,True,font_color)
 		text_time=base_font.render(formatted_current_time,True,font_color)
 		if formatted_current_time==formatted_song_length:
@@ -324,11 +330,14 @@ def main():
 		display.blit(text_obj,(180,10))
 		display.blit(text_time,(110,10))
 		display.blit(label, (760, 6))
+		textinputButton.draw (display, (0,0,0))
+		display.blit(textinput.surface, (900, 254))
 		loadSongButton.draw(display, (0,0,0))
 		loadButton.draw (display, (0,0,0))
 		saveasButton.draw (display, (0,0,0))
 		saveButton.draw (display, (0,0,0))
 		restartButton.draw (display, (0,0,0))
+
 		#green.draw(display)
 		draw_color_rects(temporary_color_codes)
 		draw_color_circles(color_circle_colors)
@@ -339,9 +348,12 @@ def main():
 		# creating a loop to check events that
 		# are occuring
 
-		for event in pygame.event.get():
-
+    # Blit its surface onto the screen
+		for event in events:
+			
 			pos = pygame.mouse.get_pos()
+
+
 			
 			if event.type == pygame.QUIT:
 				#print(file_name)
@@ -350,6 +362,9 @@ def main():
 			#pygame.display.update()
 			# checking if keydown event happened or not
 			if event.type == pygame.KEYDOWN:
+				if textinputButton.isOver(pos):
+					print('hatice')
+					textinput.update(events)
 				
 				# if keydown event happened
 				# than printing a string to output
@@ -441,19 +456,19 @@ def main():
 				
 						
 				if saveButton.isOver(pos):
-					if text_file!="<No File Selected>":
-						with open(text_file.name, 'w') as fp:
+					if textinput.value:
+						full_textfile_name= textinput.value+'.txt'
+						with open(full_textfile_name, 'w') as fp:
 							json.dump(temporary_color_codes, fp)
-						print(text_file.name)
-						if os.path.getsize(text_file.name) != 0:
-							with  open(text_file.name, "r") as file:
+						if os.path.getsize(full_textfile_name) != 0:
+							with  open(full_textfile_name, "r") as file:
 								current = file.read()
-								if os.path.getsize(text_file.name) == 0:
+								if os.path.getsize(full_textfile_name) == 0:
 									file.close()
-									os.remove(text_file.name)
+									os.remove(full_textfile_name)
 								else:
 									print('File is not empty')
-									out_file = open(text_file.name, "w")
+									out_file = open(full_textfile_name, "w")
 
 									json.dump(temporary_color_codes, out_file, indent = 6)
 									
@@ -469,6 +484,7 @@ def main():
 					# x,y=pos
 					# x=0
 					# song_offset = get_song_position(x,total_length)
+
 					
 
 			if event.type == pygame.MOUSEMOTION:
@@ -489,4 +505,6 @@ def main():
 						# pygame.mixer.music.pause()
 						
 						song_offset = get_song_position(x,total_length)
+
+    	
 main()
