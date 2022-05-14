@@ -1,4 +1,5 @@
 import colorsys
+from pdb import Restart
 import time
 from numpy import timedelta64
 from pygame import mixer
@@ -19,6 +20,7 @@ from socket import *
 import struct
 from tkinter.filedialog import asksaveasfile
 from tkinter import *
+import pygame_textinput
 
 
 
@@ -62,6 +64,9 @@ user_input = args.prompt
 
 pygame.init()
 
+text_input_font = pygame.font.SysFont("comicsans", 15)
+manager = pygame_textinput.TextInputManager(validator = lambda input: len(input) <= 19)
+textinput = pygame_textinput.TextInputVisualizer(manager=manager,font_object=text_input_font)
 # def slide():
 # 	pass
 # #create music position slider
@@ -103,7 +108,7 @@ def show_details():
 	#file_data=os.path.splitext(user_input)
 	total_length=0
 	#if file_data[1] == '.mp3':
-	audio = MP3(user_input+'.mp3')
+	audio = MP3('./MP3 Song File/'+user_input+'.mp3')
 	total_length=audio.info.length
 	mins,secs=divmod(total_length,60)
 	mins=round(mins)
@@ -197,7 +202,7 @@ class button():
 		self.text=text
 
 	def draw(self,win,outline=None):
-	#Call this method to draw the button on the screen
+	#Call this method to draw the button on the screen 20 50 1150 30 
 		if outline:
 			pygame.draw.rect (display, outline, (self.x-2,self.y-2,self.width+4,self.height+4),0)
 			pygame.draw.rect (display, self.color, (self.x,self.y,self.width,self.height),0)
@@ -208,7 +213,7 @@ class button():
 			pygame.draw.rect (display, outline, (bar_start_position-2,150-2,bar_length+4,30+4),0)
 			pygame.draw.rect(display, (255,255,255), (bar_start_position, 150, bar_length, 30))
 			pygame.draw.rect (display, outline, (bar_start_position-2,200-2,bar_length+4,30+4),0)
-			pygame.draw.rect(display, (255,255,255), (bar_start_position, 200, bar_length, 30))
+			pygame.draw.rect(display, (255,255,255), (bar_start_position, 200, bar_length, 30)),
 
 			#pygame.draw.line(display, (255,0,0),(22, 50), (22, 80), 5)
 
@@ -227,12 +232,17 @@ class button():
 
 # def redrawWindow():
 # 	#display.fill((255,255,255))
-# 	greenButton.draw (display, (0,0,0))
+# 	loadSongButton.draw (display, (0,0,0))
 	
 
-greenButton = button((0,255,0), 20, 5, 80, 30, user_input+'.mp3')
-textButton = button((0,255,0), 1090, 5, 80, 30, 'LOAD')
-saveButton=button((0,255,0), 980, 5, 80, 30, 'save files')
+loadSongButton = button((0,255,0), 20, 5, 80, 30, user_input+'.mp3')
+loadButton = button((0,255,0), 1090, 5, 80, 30, 'LOAD')
+#saveasButton=button((0,255,0), 980, 5, 80, 30, 'Save As')
+saveButton=button((0,255,0), 980, 5, 80, 30, 'Save')
+restartButton=button((0,255,0), 1090, 250, 80, 30, 'Restart')
+textinputButton=button((255,255,255), 790, 5, 160, 30, '')
+
+
 	
 
 def get_line_position(current_song_timestamp,total_length):
@@ -240,6 +250,12 @@ def get_line_position(current_song_timestamp,total_length):
 	percent_through_song = (current_song_timestamp)/(total_length)
 	line_position = (percent_through_song * bar_length)+bar_start_position
 	return line_position
+
+def get_song_position(x,total_length):
+	x_position=(x-20)
+	song_multiplier=x_position/bar_length
+	return(song_multiplier*total_length)
+
 
 def create_file(song_name):
 	file_name=''
@@ -276,6 +292,10 @@ def compare_current_time(temporary_color_codes,current_time_in_secs,color_circle
 	
 	return color_circle_colors
 
+def sort_dict(my_dict):
+    sorted_dict = sorted(my_dict.items(), key=lambda x: int(x[0]))
+    return dict(sorted_dict)
+
 def main():
 # creating a running loop
 	#redrawWindow()	
@@ -286,26 +306,42 @@ def main():
 	"1":"k,k,k"
 	}
 	pygame.display.update()
-	f = "<No File Selected>"
+	text_file = "<No File Selected>"
 	formatted_song_length =show_details()
 	current_song_name=user_input
-	label = myfont.render(current_song_name, 1, (0,0,0))
+	#label = myfont.render(current_song_name, 1, (0,0,0))
+	song_offset = 0
+	mixer.init()
+	mixer.music.load('./MP3 Song File/'+current_song_name+'.mp3')
+	mixer.music.set_volume(0.8)
+	
 	while True:
-		current_time_in_secs=pygame.mixer.music.get_pos()/1000
+		# print("song_offset",song_offset)
+		# print("pygame.mixer.music.get_pos()",pygame.mixer.music.get_pos())
+		temporary_color_codes = sort_dict(temporary_color_codes)
+		current_time_in_secs=song_offset + pygame.mixer.music.get_pos()/1000
 		minutes = math.floor(current_time_in_secs/60)
 		seconds = math.floor(current_time_in_secs %60)
 		formatted_current_time='{:02d}:{:02d}'.format(minutes,seconds)
+		if formatted_current_time == "-1:59":
+			formatted_current_time = "00:00"
 		display.fill((255,255,255))
+		events=pygame.event.get()
 		text_obj=base_font.render(formatted_song_length,True,font_color)
 		text_time=base_font.render(formatted_current_time,True,font_color)
 		if formatted_current_time==formatted_song_length:
 			formatted_current_time=='{:00}:{:00}'
 		display.blit(text_obj,(180,10))
 		display.blit(text_time,(110,10))
-		display.blit(label, (840, 10))
-		greenButton.draw(display, (0,0,0))
-		textButton.draw (display, (0,0,0))
+		#display.blit(label, (760, 6))
+		textinputButton.draw (display, (0,0,0))
+		display.blit(textinput.surface, (790, 8))
+		loadSongButton.draw(display, (0,0,0))
+		loadButton.draw (display, (0,0,0))
+		#saveasButton.draw (display, (0,0,0))
 		saveButton.draw (display, (0,0,0))
+		restartButton.draw (display, (0,0,0))
+
 		#green.draw(display)
 		draw_color_rects(temporary_color_codes)
 		draw_color_circles(color_circle_colors)
@@ -316,30 +352,26 @@ def main():
 		# creating a loop to check events that
 		# are occuring
 
-		for event in pygame.event.get():
-
+    # Blit its surface onto the screen
+		for event in events:
+			
 			pos = pygame.mouse.get_pos()
-			if event.type == pygame.QUIT:
-				print(file_name)
-				with open(file_name, "r") as file:
-						current = file.read()
-						if os.path.getsize(file_name) == 0:
-							file.close()
-							os.remove(file_name)
-						else:
-							print('File is not empty')
-							with  open(file_name, "w") as file:
-								if current[0]!='{':
-									file.writelines('{\n'+ current[:-2] + '\n}')
-								else:
-									file.writelines(current[:-2] + '\n}')
 
+
+			
+			if event.type == pygame.QUIT:
+				#print(file_name)
 				pygame.quit()
 				sys.exit()
 			#pygame.display.update()
 			# checking if keydown event happened or not
 			if event.type == pygame.KEYDOWN:
+
+				if textinputButton.isOver(pos) and not mixer.music.get_busy():
+					#print('hatice')
+					textinput.update(events)
 			
+				
 				# if keydown event happened
 				# than printing a string to output
 				#print(event.unicode) 
@@ -347,82 +379,146 @@ def main():
 				current=''
 				timestamp=''
 				content=''
-
+				if pygame.key.get_mods() & pygame.KMOD_LCTRL:
+					print ("pressed: ctrl + "+pygame.key.name(event.key))
 				if str(event.unicode) in key_colors and mixer.music.get_busy():
-
-					with open(file_name, "r") as file:
-						current = file.read()
-					with open(file_name, "w+") as file:
-						content = key_colors[str(event.unicode)]
-						timestamp = str(pygame.mixer.music.get_pos())
-						file.writelines(current + '"' + timestamp + '" : "' + content + '",\n')
-						temporary_color_codes[timestamp] = content
+					# print(str(event))
+					# with open(file_name, "r") as file:
+					# 	current = file.read()
+					# with open(file_name, "w+") as file:
+					content = key_colors[str(event.unicode)]
+					timestamp = str(int(song_offset*1000) + pygame.mixer.music.get_pos())
+					# 	file.writelines(current + '"' + timestamp + '" : "' + content + '",\n')
+					temporary_color_codes[timestamp] = content
 					
-						for ball_number,color_letter in enumerate(content.split(",")):
-							if color_letter!='x':
-								change_real_color(color_letter,ball_number)
-								color_circle_colors[ball_number]=color_letter
-
+					for ball_number,color_letter in enumerate(content.split(",")):
+						if color_letter!='x':
+							change_real_color(color_letter,ball_number)
+							color_circle_colors[ball_number]=color_letter
+				
+				# if event.key == pygame.K_LCTRL:
+				# 	print("ctrl is pressed")
+					# keys = pygame.key.get_pressed()
+					# if keys[pygame.K_LCTRL] and keys[pygame.K_f]:
+					# 	print("ctrl AND F are pressed")
 			
+
 								
 				if event.key == pygame.K_SPACE and not mixer.music.get_busy():
-					mixer.init()
-					mixer.music.load(current_song_name+'.mp3')
-					mixer.music.set_volume(0.8)
-					mixer.music.play()
-					file_name=create_file(current_song_name)
+					# mixer.init()
+					# mixer.music.load(current_song_name+'.mp3')
+					# mixer.music.set_volume(0.8)
+					mixer.music.play(0,song_offset)
+					#file_name=create_file(current_song_name)
 					# with  open(file_name, "w") as file:
 					# 	line=['{\n']
 					# 	file.writelines(line)
 					#while mixer.music.get_busy():
 				elif event.key == pygame.K_SPACE and mixer.music.get_busy():
-					pygame.mixer.music.pause()
-					if os.path.getsize(file_name) != 0:
-						with  open(file_name, "r") as file:
-							current = file.read()
-						with  open(file_name, "w") as file:
-							file.writelines('{\n'+ current[:-2] + '\n}')
-					else:
-						os.remove(file_name)
+					pygame.mixer.music.stop()
+					song_offset = get_song_position(line_position,total_length)
+					# if os.path.getsize(file_name) != 0:
+					# 	with  open(file_name, "r") as file:
+					# 		current = file.read()
+					# 	with  open(file_name, "w") as file:
+					# 		file.writelines('{\n'+ current[:-2] + '\n}')
+					# else:
+					# 	os.remove(file_name)
 
 				
 			if event.type == pygame.MOUSEBUTTONDOWN:
-				if greenButton.isOver(pos):
+				if loadSongButton.isOver(pos):
+					path_of_user_selected_file = prompt_file()
 					#print ('clicked the button')
+					if path.exists(path_of_user_selected_file):	
+						user_selected_file = path_of_user_selected_file.split("/")[-1]
+						loadSongButton.text = user_selected_file
+						pygame.mixer.music.stop()
+						current_song_name=user_selected_file.split(".mp3")[0]
+						file_name=create_file(current_song_name)
+						audio = MP3(path_of_user_selected_file)
+						mixer.music.load(path_of_user_selected_file)
+						total_length=audio.info.length
+						mins,secs=divmod(total_length,60)
+						mins=math.floor(mins)
+						secs=math.floor(secs)
+						formatted_song_length='{:02d}:{:02d}'.format(mins,secs)
+						#pygame.mixer.music.stop()
+						song_offset=0
+				if loadButton.isOver(pos):
 					path_of_user_selected_file = prompt_file()
 					user_selected_file = path_of_user_selected_file.split("/")[-1]
-					greenButton.text = user_selected_file
-					pygame.mixer.music.pause()
-					current_song_name=user_selected_file.split(".mp3")[0]
-					file_name=create_file(current_song_name)
-					print (f)
-					audio = MP3(user_selected_file)
-					total_length=audio.info.length
-					mins,secs=divmod(total_length,60)
-					mins=math.floor(mins)
-					secs=math.floor(secs)
-					formatted_song_length='{:02d}:{:02d}'.format(mins,secs)
-				if textButton.isOver(pos):
-					path_of_user_selected_file = prompt_file()
-					user_selected_file = path_of_user_selected_file.split("/")[-1]
-					label = myfont.render(user_selected_file.split(".txt")[0], 1, (0,0,0))
+					#label = myfont.render(user_selected_file.split(".txt")[0], 1, (0,0,0))
 					#textButton.text = user_selected_file.split(".txt")[0]
 					#temporary_color_codes=(user_selected_file_2.split(".txt")[0])
+					textinput.update(events)
+					textinput.value=user_selected_file.split(".txt")[0]
 					if path.exists(path_of_user_selected_file):	
 						#print('file exists')		
 						with open(path_of_user_selected_file) as json_file:
 							temporary_color_codes = json.load(json_file)
+				# if saveasButton.isOver(pos):
+				# 	text_file = asksaveasfile(initialfile = 'Untitled.txt',defaultextension=".txt",filetypes=[("All Files","*.*"),("Text Documents","*.txt")])
+				# 	if text_file is not None:
+				# 		print('text_file.name',text_file.name)
+				# 		with open(text_file.name, 'w') as fp:
+				# 			json.dump(temporary_color_codes, fp,indent = 6)
+				# 			label = myfont.render(text_file.name.split(".txt")[0].split("/")[-1], 1, (0,0,0))
+				# 			fp.close()
+				
+						
 				if saveButton.isOver(pos):
-					f = asksaveasfile(initialfile = 'Untitled.txt',defaultextension=".txt",filetypes=[("All Files","*.*"),("Text Documents","*.txt")])
-					print('f.name',f.name)
-					with open(f.name, 'w') as fp:
-						json.dump(temporary_color_codes, fp)
-						label = myfont.render(f.name.split(".txt")[0].split("/")[-1], 1, (0,0,0))		
+					if textinput.value:
+						full_textfile_name= textinput.value+'.txt'
+						with open(full_textfile_name, 'w') as fp:
+							json.dump(temporary_color_codes, fp)
+						if os.path.getsize(full_textfile_name) != 0:
+							with  open(full_textfile_name, "r") as file:
+								current = file.read()
+								if os.path.getsize(full_textfile_name) == 0:
+									file.close()
+									os.remove(full_textfile_name)
+								else:
+									print('File is not empty')
+									out_file = open(full_textfile_name, "w")
+
+									json.dump(temporary_color_codes, out_file, indent = 6)
+									
+									out_file.close()
+
+				if restartButton.isOver(pos):
+					pygame.mixer.music.stop()
+					textinput.update(events)
+					textinput.value=''
+					temporary_color_codes={
+					"1":"k,k,k"
+					}
+					color_circle_colors=["k","k","k"]
+					song_offset=0
+					# x,y=pos
+					# x=0
+					# song_offset = get_song_position(x,total_length)
+
+					
 
 			if event.type == pygame.MOUSEMOTION:
-				if greenButton.isOver(pos):
-					greenButton.color = (255,0,0)
+				if loadSongButton.isOver(pos):
+					loadSongButton.color = (255,0,0)
 				else:
-					greenButton.color = (0,255,0)
+					loadSongButton.color = (0,255,0)
 
+			if event.type == pygame.MOUSEBUTTONUP:
+				x,y=pos
+				if 20<x<1170 and 50<y<80:
+					if mixer.music.get_busy():
+						#print(pos)
+						pygame.mixer.music.play(0,(get_song_position(x,total_length)))
+						song_offset = get_song_position(x,total_length)
+					else:
+						# pygame.mixer.music.play(0,(get_song_position(x,total_length)))
+						# pygame.mixer.music.pause()
+						
+						song_offset = get_song_position(x,total_length)
+
+    	
 main()
