@@ -1,10 +1,44 @@
 
 
-eventually:
+todo:
 	we should be able to fade from one color to another using a modifier key like ctrl
     figure out how to use ctrl
+    if ctrl + color key is pressed then we dont just add a color at that time stamp,
+      we add "in between" colors every 1/5th? of a second all the way from the previous timestamp that was added to that ball
+        make a function that takes these inputs: 
+          temp_dict, new_color, new_timestamp
+        and returns a new temp_dict that has a bunch of "in between" colors - this will be set as our new dictionary
+  
   strobe ability
-    off/color strobe simplest, but also complicated multi-color strobes
+    either use alt or shift as the modifier for this, so pick one and make a print that proves that we can detect when a key is used with one of these modifier
+    this will be similar to fade in that it uses a special function that puts a whole bunch of color changes into the dictionary, the difference is that instead of fading, it does a rapid switch between black and the color that was pressed and this strobe continues up until the next color is pressed.
+      there is something extra to consider here in that when the next key is pressed it must remove all strobing after that point for that ball was pressed.
+        for example:
+          1 red
+          2000 (blue begins) blue
+          2050 black
+          2100 blue
+          2150 black
+          ...
+          3400 blue
+          3450 black
+          3500 blue
+          3550 black
+          ...
+          9500 blue
+          9550 black
+          9600 song ends
+        now, imagine once the song gets up to 3550 the user presses yellow,
+          at this point it removes every strobe after 3550
+            TO DECIDE ON:
+              how does it know the keys that are part of a astrobe?
+               with our current way of handling this it would just make the yellow up to the next color command
+                MAYBE - use another modifier key that instead of just inserting a key into the program it actually overrides all future keys. i think this is good.
+
+Hatice:
+  what happened to the texts folder? I thought we had a special folder to hold all the text files made by the program?
+
+
 
 
 
