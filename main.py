@@ -96,7 +96,7 @@ def notification_message(message):
 	notification.title = "Juggling Balls"
 	notification.message = message
 	notification.send()
-notification_message('hiiiiii')
+
 def prompt_file():
     #"""Create a Tk file dialog and cleanup when finished"""
     top = tkinter.Tk()
@@ -318,7 +318,7 @@ def main():
 	mixer.init()
 	mixer.music.load('./MP3 Song File/'+current_song_name+'.mp3')
 	mixer.music.set_volume(0.8)
-	
+	textinput.value='default'
 	while True:
 		# print("song_offset",song_offset)
 		# print("pygame.mixer.music.get_pos()",pygame.mixer.music.get_pos())
@@ -384,22 +384,80 @@ def main():
 				current=''
 				timestamp=''
 				content=''
-				if pygame.key.get_mods() & pygame.KMOD_LCTRL:
+				letter_key_pressed=pygame.key.name(event.key)
+				ctrl_pressed=False
+				shift_pressed=False
+				alt_pressed=False
+
+				if pygame.key.get_mods() & pygame.KMOD_LCTRL and (pygame.key.name(event.key)!='left ctrl') :
 					print ("pressed: ctrl + "+pygame.key.name(event.key))
-				if pygame.key.get_mods() & pygame.KMOD_SHIFT:
+					ctrl_pressed=True
+					letter_key_pressed=pygame.key.name(event.key)
+				elif pygame.key.get_mods() & pygame.KMOD_SHIFT and (pygame.key.name(event.key)!='right shift'):
 					print ("pressed: shift + "+pygame.key.name(event.key))
-				if pygame.key.get_mods() & pygame.KMOD_ALT:
-					print ("pressed: alt + "+pygame.key.name(event.key))
-				if str(event.unicode) in key_colors and mixer.music.get_busy():
-					# print(str(event))
-					# with open(file_name, "r") as file:
-					# 	current = file.read()
-					# with open(file_name, "w+") as file:
-					content = key_colors[str(event.unicode)]
+					shift_pressed=True
+					letter_key_pressed=pygame.key.name(event.key)
+				elif pygame.key.get_mods() & pygame.KMOD_ALT  and (pygame.key.name(event.key)!='right alt'):
+					# ("pressed: alt + "+pygame.key.name(event.key))
+					alt_pressed=True
+					letter_key_pressed=pygame.key.name(event.key)
+				else:
+					letter_key_pressed = str(event.unicode)
+				if letter_key_pressed in key_colors and mixer.music.get_busy():
+					content = key_colors[letter_key_pressed]
+					ball_numbers_used=[]
+					for ball_number,color_letter in enumerate(content.split(",")):
+						if color_letter!='x':
+							ball_numbers_used.append(ball_number)
 					timestamp = str(int(song_offset*1000) + pygame.mixer.music.get_pos())
 					# 	file.writelines(current + '"' + timestamp + '" : "' + content + '",\n')
 					temporary_color_codes[timestamp] = content
-					
+					temporary_color_codes = sort_dict(temporary_color_codes)
+					if shift_pressed:
+						for key in temporary_color_codes.copy():
+							value = temporary_color_codes[key]
+							if int(timestamp)<int(key):
+								if len(ball_numbers_used)>1:
+									del temporary_color_codes[key]
+								else:
+									split_value=value.split(',')
+									split_value[ball_numbers_used[0]]="x"
+									temporary_color_codes[key]=",".join(split_value)
+					if alt_pressed:
+						lowest_key_that_higher_than_timestamp = 0
+						strobe_end_time=0
+						list_of_dictionary_keys = list(temporary_color_codes.keys())
+						timestamp_index=list_of_dictionary_keys.index(timestamp)	
+						index_of_lowest_key_that_higher_than_timestamp = timestamp_index + 1
+						if len(list_of_dictionary_keys)-1 > timestamp_index:
+							lowest_key_that_higher_than_timestamp = list_of_dictionary_keys[index_of_lowest_key_that_higher_than_timestamp]
+							strobe_end_time=int(lowest_key_that_higher_than_timestamp)
+						else:
+							strobe_end_time = total_length*1000
+						next_strobe_time=int(timestamp)+500
+						next_strobe_is_color=False
+						strobe_color_content = content
+						strobe_black_content = "k,k,k"
+						# if len(ball_numbers_used) == 1:
+						# 	#if we are ony strobıng one ball, then we need to keep the other two ball exactly
+						# 	# how they were. we can do this by makıng all strobes and then doıng overwrıtes
+						# 	# with what was in the dictionary
+						# 	#     for this we probably want to turn overwrite into a function
+						# 	split_color_content=content.split(',')
+						# 	split_strobe_color_content=split_color_content
+						# 	split_strobe_color_content = split_color_content[ball_numbers_used[0]]
+						# 	strobe_color_content=",".join(split_strobe_color_content)
+						# 	strobe_black_content
+						while next_strobe_time<=(strobe_end_time):								
+							if next_strobe_is_color:
+								temporary_color_codes[next_strobe_time] = strobe_color_content
+							else:
+								temporary_color_codes[next_strobe_time] = strobe_black_content
+							next_strobe_is_color = not next_strobe_is_color
+							next_strobe_time+=500
+								
+							#print("lowest_key_that_higher_than_timestamp",lowest_key_that_higher_than_timestamp)
+
 					for ball_number,color_letter in enumerate(content.split(",")):
 						if color_letter!='x':
 							change_real_color(color_letter,ball_number)
@@ -425,7 +483,7 @@ def main():
 						# 	file.writelines(line)
 						#while mixer.music.get_busy():
 					else:
-						print('hey')
+						notification_message('You must enter the file name to play the song.')
 						#notification must have textinput to play the song
 				elif event.key == pygame.K_SPACE and mixer.music.get_busy():
 					pygame.mixer.music.stop()

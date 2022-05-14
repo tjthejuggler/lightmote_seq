@@ -1,6 +1,11 @@
 
-
+you can out notification around save button if there is nothing to save and when the file saved
 todo:
+  send color commands when paused
+
+  whrn you do shift+key it should overwrite every future dictionary item after the currenttimestamp 
+    loop through entire dictionary (temp) and remove every item with a key that is higher then the current timestamp
+
 	we should be able to fade from one color to another using a modifier key like ctrl
     figure out how to use ctrl
     if ctrl + color key is pressed then we dont just add a color at that time stamp,
@@ -30,13 +35,14 @@ todo:
           9600 song ends
         now, imagine once the song gets up to 3550 the user presses yellow,
           at this point it removes every strobe after 3550
-            TO DECIDE ON:
-              how does it know the keys that are part of a astrobe?
-               with our current way of handling this it would just make the yellow up to the next color command
-                MAYBE - use another modifier key that instead of just inserting a key into the program it actually overrides all future keys. i think this is good.
 
-Hatice:
-  what happened to the texts folder? I thought we had a special folder to hold all the text files made by the program?
+
+combıne mods for overwrıte strobe or maybe use right alt,ctrl
+
+bug
+  clıckıng ınto the mıddle of a color doesnt make the circies be set to that color
+
+
 
 
 
