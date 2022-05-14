@@ -21,7 +21,7 @@ import struct
 from tkinter.filedialog import asksaveasfile
 from tkinter import *
 import pygame_textinput
-
+from notifypy import Notify
 
 
 udp_header = struct.pack("!bIBH", 66, 0, 0, 0)
@@ -91,8 +91,12 @@ def change_real_color(color_key, ball_number):
 	s.sendto(udp_header+data, ('192.168.43.'+ip, 41412))
 	#("ball with ip "+ ip + " " + hex_color )
 
-
-
+def notification_message(message):
+	notification = Notify()
+	notification.title = "Juggling Balls"
+	notification.message = message
+	notification.send()
+notification_message('hiiiiii')
 def prompt_file():
     #"""Create a Tk file dialog and cleanup when finished"""
     top = tkinter.Tk()
@@ -257,17 +261,17 @@ def get_song_position(x,total_length):
 	return(song_multiplier*total_length)
 
 
-def create_file(song_name):
+def create_file (textinput):
 	file_name=''
 	count=0
 	looking_for_file=True
 	while looking_for_file:
 			
-		if path.exists('./texts/'+ song_name +'('+str(count)+').txt'):	
+		if path.exists('./texts/'+  textinput +'.txt'):	
 			count+=1
 		else:
 			looking_for_file=False
-			file_name='./texts/'+song_name +'('+str(count)+').txt'
+			file_name='./texts/'+ textinput +'.txt'
 			open(file_name, "w") 
 
 	return file_name
@@ -318,6 +322,7 @@ def main():
 	while True:
 		# print("song_offset",song_offset)
 		# print("pygame.mixer.music.get_pos()",pygame.mixer.music.get_pos())
+		textinput.value=textinput.value.strip()
 		temporary_color_codes = sort_dict(temporary_color_codes)
 		current_time_in_secs=song_offset + pygame.mixer.music.get_pos()/1000
 		minutes = math.floor(current_time_in_secs/60)
@@ -381,6 +386,10 @@ def main():
 				content=''
 				if pygame.key.get_mods() & pygame.KMOD_LCTRL:
 					print ("pressed: ctrl + "+pygame.key.name(event.key))
+				if pygame.key.get_mods() & pygame.KMOD_SHIFT:
+					print ("pressed: shift + "+pygame.key.name(event.key))
+				if pygame.key.get_mods() & pygame.KMOD_ALT:
+					print ("pressed: alt + "+pygame.key.name(event.key))
 				if str(event.unicode) in key_colors and mixer.music.get_busy():
 					# print(str(event))
 					# with open(file_name, "r") as file:
@@ -404,16 +413,20 @@ def main():
 			
 
 								
-				if event.key == pygame.K_SPACE and not mixer.music.get_busy():
-					# mixer.init()
-					# mixer.music.load(current_song_name+'.mp3')
-					# mixer.music.set_volume(0.8)
-					mixer.music.play(0,song_offset)
-					#file_name=create_file(current_song_name)
-					# with  open(file_name, "w") as file:
-					# 	line=['{\n']
-					# 	file.writelines(line)
-					#while mixer.music.get_busy():
+				if event.key == pygame.K_SPACE and not mixer.music.get_busy() and not textinputButton.isOver(pos):
+					if textinput.value!='':
+						# mixer.init()
+						# mixer.music.load(current_song_name+'.mp3')
+						# mixer.music.set_volume(0.8)
+						mixer.music.play(0,song_offset)
+						#file_name=create_file(current_song_name)
+						# with  open(file_name, "w") as file:
+						# 	line=['{\n']
+						# 	file.writelines(line)
+						#while mixer.music.get_busy():
+					else:
+						print('hey')
+						#notification must have textinput to play the song
 				elif event.key == pygame.K_SPACE and mixer.music.get_busy():
 					pygame.mixer.music.stop()
 					song_offset = get_song_position(line_position,total_length)
@@ -435,7 +448,7 @@ def main():
 						loadSongButton.text = user_selected_file
 						pygame.mixer.music.stop()
 						current_song_name=user_selected_file.split(".mp3")[0]
-						file_name=create_file(current_song_name)
+						#file_name=create_file(current_song_name)
 						audio = MP3(path_of_user_selected_file)
 						mixer.music.load(path_of_user_selected_file)
 						total_length=audio.info.length
@@ -468,24 +481,12 @@ def main():
 				
 						
 				if saveButton.isOver(pos):
-					if textinput.value:
-						full_textfile_name= textinput.value+'.txt'
-						with open(full_textfile_name, 'w') as fp:
-							json.dump(temporary_color_codes, fp)
-						if os.path.getsize(full_textfile_name) != 0:
-							with  open(full_textfile_name, "r") as file:
-								current = file.read()
-								if os.path.getsize(full_textfile_name) == 0:
-									file.close()
-									os.remove(full_textfile_name)
-								else:
-									print('File is not empty')
-									out_file = open(full_textfile_name, "w")
-
-									json.dump(temporary_color_codes, out_file, indent = 6)
-									
-									out_file.close()
-
+					if textinput.value and len(temporary_color_codes)>1:
+						textfile_path= './texts/'+textinput.value+'.txt'
+						with open(textfile_path, 'w') as fp:
+							json.dump(temporary_color_codes, fp,indent = 6)
+				#notification must have text in textinput
+					
 				if restartButton.isOver(pos):
 					pygame.mixer.music.stop()
 					textinput.update(events)
