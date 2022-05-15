@@ -537,37 +537,13 @@ def main():
 								split_current_value = current_value.split(';')
 								split_current_value[ball_number] = indiv_ball_dict[key]
 								consolidated_dict[key] = ";".join(split_current_value)
-								#we need to get whatever is currently in consolidated dict for this key
-								# and then depending on the ball number add the indiv_ball_dict for that key
-								#sometimes we will need to split(and save) what is already in consolidated dict
-								#	and replace an x that is in it with the ball info from a new indiv_ball_dict
-								#our consolidated dict should build up like
-								# 255,255,0;x;x
-								# 255,255,0;255,255,0;x
-								# 255,255,0;255,255;255,255
-								# but not always, sometimes a fade will be on its own with a bunch of x
-								
-
-							# temporary_color_codes = {k: new_fade_items.get(k, 0) + temporary_color_codes.get(k, 0) for k in set(new_fade_items) | set(temporary_color_codes)}				
-							# new_dict = Merge(new_fade_items, temporary_color_codes)
-							#print("new_fade_items",new_fade_items)
-							#print("temporary_color_codes",temporary_color_codes)
-						
 						temporary_color_codes.update(consolidated_dict)
 						print("temporary_color_codes2", temporary_color_codes)
 					for ball_number,color_letter in enumerate(content.split(";")):
 						if color_letter!='x':
 							change_real_color(color_letter,ball_number)
 							color_circle_colors[ball_number]=color_letter
-				
-				# if event.key == pygame.K_LCTRL:
-				# 	print("ctrl is pressed")
-					# keys = pygame.key.get_pressed()
-					# if keys[pygame.K_LCTRL] and keys[pygame.K_f]:
-					# 	print("ctrl AND F are pressed")
-			
 
-								
 				if event.key == pygame.K_SPACE and not mixer.music.get_busy() and not textinputButton.isOver(pos):
 					if textinput.value!='':
 						# mixer.init()
