@@ -300,6 +300,38 @@ def sort_dict(my_dict):
     sorted_dict = sorted(my_dict.items(), key=lambda x: int(x[0]))
     return dict(sorted_dict)
 
+def combine_dict_values_for_strobe(item1, item2):
+	split_new_item = ['x','x','x']
+	split_item1 = item1.split(',')
+	split_item2 = item2.split(',')
+	for i in range (0,3):
+		if split_item1[i] != 'x':
+			split_new_item[i] = split_item1[i]
+		if split_item2[i] != 'x':
+			split_new_item[i] = split_item2[i]
+	return ",".join(split_new_item)
+
+def add_strobes(temporary_color_codes, color, ball_number, timestamp, strobe_end_time):
+	new_temporary_color_codes = temporary_color_codes
+	next_strobe_time=int(timestamp)
+	next_strobe_is_color=True
+	split_strobe_color_content = ['x','x','x']
+	split_strobe_color_content[ball_number] = color
+	strobe_color_content = ",".join(split_strobe_color_content)
+	split_strobe_black_content = ['x','x','x']
+	split_strobe_black_content[ball_number] = 'k'
+	strobe_black_content = ",".join(split_strobe_black_content)
+	while next_strobe_time<strobe_end_time:		
+		strobe_to_add = strobe_black_content						
+		if next_strobe_is_color:
+			strobe_to_add = strobe_color_content
+		if next_strobe_time in temporary_color_codes:
+			strobe_to_add = combine_dict_values_for_strobe(temporary_color_codes[next_strobe_time], strobe_to_add)
+		temporary_color_codes[next_strobe_time] = strobe_to_add
+		next_strobe_is_color = not next_strobe_is_color
+		next_strobe_time+=500	
+	return new_temporary_color_codes
+
 def main():
 # creating a running loop
 	#redrawWindow()	
@@ -360,10 +392,7 @@ def main():
     # Blit its surface onto the screen
 		for event in events:
 			
-			pos = pygame.mouse.get_pos()
-
-
-			
+			pos = pygame.mouse.get_pos()			
 			if event.type == pygame.QUIT:
 				#print(file_name)
 				pygame.quit()
@@ -371,16 +400,8 @@ def main():
 			#pygame.display.update()
 			# checking if keydown event happened or not
 			if event.type == pygame.KEYDOWN:
-
 				if textinputButton.isOver(pos) and not mixer.music.get_busy():
-					#print('hatice')
 					textinput.update(events)
-			
-				
-				# if keydown event happened
-				# than printing a string to output
-				#print(event.unicode) 
- 
 				current=''
 				timestamp=''
 				content=''
@@ -388,7 +409,6 @@ def main():
 				ctrl_pressed=False
 				shift_pressed=False
 				alt_pressed=False
-
 				if pygame.key.get_mods() & pygame.KMOD_LCTRL and (pygame.key.name(event.key)!='left ctrl') :
 					print ("pressed: ctrl + "+pygame.key.name(event.key))
 					ctrl_pressed=True
@@ -397,8 +417,8 @@ def main():
 					print ("pressed: shift + "+pygame.key.name(event.key))
 					shift_pressed=True
 					letter_key_pressed=pygame.key.name(event.key)
-				elif pygame.key.get_mods() & pygame.KMOD_ALT  and (pygame.key.name(event.key)!='right alt'):
-					# ("pressed: alt + "+pygame.key.name(event.key))
+				elif pygame.key.get_mods() & pygame.KMOD_ALT  and (pygame.key.name(event.key)!='left alt'):
+					print("pressed: alt + "+pygame.key.name(event.key))
 					alt_pressed=True
 					letter_key_pressed=pygame.key.name(event.key)
 				else:
@@ -410,7 +430,6 @@ def main():
 						if color_letter!='x':
 							ball_numbers_used.append(ball_number)
 					timestamp = str(int(song_offset*1000) + pygame.mixer.music.get_pos())
-					# 	file.writelines(current + '"' + timestamp + '" : "' + content + '",\n')
 					temporary_color_codes[timestamp] = content
 					temporary_color_codes = sort_dict(temporary_color_codes)
 					if shift_pressed:
@@ -424,39 +443,21 @@ def main():
 									split_value[ball_numbers_used[0]]="x"
 									temporary_color_codes[key]=",".join(split_value)
 					if alt_pressed:
-						lowest_key_that_higher_than_timestamp = 0
-						strobe_end_time=0
-						list_of_dictionary_keys = list(temporary_color_codes.keys())
-						timestamp_index=list_of_dictionary_keys.index(timestamp)	
-						index_of_lowest_key_that_higher_than_timestamp = timestamp_index + 1
-						if len(list_of_dictionary_keys)-1 > timestamp_index:
-							lowest_key_that_higher_than_timestamp = list_of_dictionary_keys[index_of_lowest_key_that_higher_than_timestamp]
-							strobe_end_time=int(lowest_key_that_higher_than_timestamp)
-						else:
+						for ball in ball_numbers_used:
+							split_content = content.split(',')
+							color = split_content[ball]
+							have_reached_timestamp = False
 							strobe_end_time = total_length*1000
-						next_strobe_time=int(timestamp)+500
-						next_strobe_is_color=False
-						strobe_color_content = content
-						strobe_black_content = "k,k,k"
-						# if len(ball_numbers_used) == 1:
-						# 	#if we are ony strobıng one ball, then we need to keep the other two ball exactly
-						# 	# how they were. we can do this by makıng all strobes and then doıng overwrıtes
-						# 	# with what was in the dictionary
-						# 	#     for this we probably want to turn overwrite into a function
-						# 	split_color_content=content.split(',')
-						# 	split_strobe_color_content=split_color_content
-						# 	split_strobe_color_content = split_color_content[ball_numbers_used[0]]
-						# 	strobe_color_content=",".join(split_strobe_color_content)
-						# 	strobe_black_content
-						while next_strobe_time<=(strobe_end_time):								
-							if next_strobe_is_color:
-								temporary_color_codes[next_strobe_time] = strobe_color_content
-							else:
-								temporary_color_codes[next_strobe_time] = strobe_black_content
-							next_strobe_is_color = not next_strobe_is_color
-							next_strobe_time+=500
-								
-							#print("lowest_key_that_higher_than_timestamp",lowest_key_that_higher_than_timestamp)
+							for key in temporary_color_codes:
+								if have_reached_timestamp:
+									split_content = temporary_color_codes[key].split(',')
+									this_keys_balls_color = split_content[ball]
+									if this_keys_balls_color != 'x':
+										strobe_end_time = int(key)
+										break
+								if key == timestamp:
+									have_reached_timestamp = True
+							temporary_color_codes = add_strobes(temporary_color_codes, color, ball, timestamp, strobe_end_time)							
 
 					for ball_number,color_letter in enumerate(content.split(",")):
 						if color_letter!='x':
@@ -548,7 +549,7 @@ def main():
 				if restartButton.isOver(pos):
 					pygame.mixer.music.stop()
 					textinput.update(events)
-					textinput.value=''
+					#textinput.value=''
 					temporary_color_codes={
 					"1":"k,k,k"
 					}
