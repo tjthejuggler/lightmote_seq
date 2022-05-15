@@ -579,6 +579,22 @@ def main():
 						# pygame.mixer.music.pause()
 						
 						song_offset = get_song_position(x,total_length)
+				for ball_number in range(0,3):
+					print(song_offset*1000)
+					current_time_in_milisecs=int(song_offset*1000)
+	
 
-    	
+					have_found_a_lower_key=False
+					for key in reversed(temporary_color_codes):
+
+						if int(key) < current_time_in_milisecs:
+							have_found_a_lower_key = True
+						if have_found_a_lower_key:
+							split_content = temporary_color_codes[key].split(',')
+							this_keys_balls_color = split_content[ball_number]
+							if this_keys_balls_color != 'x':
+								color = this_keys_balls_color
+								break
+					color_circle_colors[ball_number]=color
+					change_real_color(color,ball_number)
 main()
