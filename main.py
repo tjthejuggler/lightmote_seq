@@ -78,6 +78,8 @@ textinput = pygame_textinput.TextInputVisualizer(manager=manager,font_object=tex
 	
 
 def change_real_color(color_key, ball_number):
+	#print("color_key",color_key)
+	#print("hex_color_codes",hex_color_codes)
 	hex_color = hex_color_codes[color_key]
 	ip=''
 	if ball_number==0:#35,172,237
@@ -152,6 +154,7 @@ class color_rect():
 	def draw(self,win):
 		outline=(255,255,255)
 	#Call this method to draw the button on the screen
+		#print(self.color)
 		pygame.draw.rect(display, self.color, (self.x, self.y, self.length, 30))
 		#pygame.draw.line(display, (255,0,0),(22, 50), (22, 80), 5)
 
@@ -166,9 +169,13 @@ class color_circle():
 def draw_color_rects(temporary_color_codes):
 	for key in temporary_color_codes:
 		value = temporary_color_codes[key]
-		for ball_number,color_letter in enumerate(value.split(",")):
-			if color_letter!='x':	
-				this_rgb_code=tuple(map(int,color_codes[color_letter].split(",")))
+		#print("value",value)
+		for ball_number,color_code in enumerate(value.split(";")):
+			if color_code!='x':	
+				#print("color_code",color_code)
+				color_code = [ int(x) for x in color_code.split(',') ]
+				this_rgb_code=tuple(color_code)
+				#print("this_rgb_code",this_rgb_code)
 				y_cord =0
 				if ball_number==0:
 					y_cord = 100
@@ -182,9 +189,10 @@ def draw_color_rects(temporary_color_codes):
 				this_color_rect.draw(display)
 
 def draw_color_circles(colors):#colors=lıst
-	for ball_number,color_letter in enumerate(colors):
-		if color_letter!='x':
-			rgb_code=tuple(map(int,color_codes[color_letter].split(",")))
+	for ball_number,color_code in enumerate(colors):
+		if color_code!='x':
+			color_code = [ int(x) for x in color_code.split(',') ]
+			rgb_code=tuple(color_code)
 			x_cord =0
 			if ball_number==0:
 				x_cord = 150
@@ -193,7 +201,7 @@ def draw_color_circles(colors):#colors=lıst
 			if ball_number==2:
 				x_cord = 550
 			this_color_circle = color_circle(rgb_code, x_cord)
-			#this_color_circle.fill=(rgb_code)
+			#this_color_circle.fill=(rgb_code)			
 			this_color_circle.draw(display)
 
 class button():
@@ -285,11 +293,11 @@ def make_color_rect(ball_numbers,colors,color_rect_list,line_position):
 
 	return color_rect_list
 
-def compare_current_time(temporary_color_codes,current_time_in_secs,color_circle_colors):
+def change_circle_and_real_colors_if_needed(temporary_color_codes,current_time_in_secs,color_circle_colors):
 	for key in temporary_color_codes:
 		value = temporary_color_codes[key]
 		if int(int(key)/100)==int(current_time_in_secs*10):
-			for index,color in enumerate(value.split(",")):
+			for index,color in enumerate(value.split(";")):
 				if color!='x':
 					color_circle_colors[index]=color
 					change_real_color(color,index)
@@ -302,26 +310,28 @@ def sort_dict(my_dict):
 
 def combine_dict_values_for_strobe(item1, item2):
 	split_new_item = ['x','x','x']
-	split_item1 = item1.split(',')
-	split_item2 = item2.split(',')
+	split_item1 = item1.split(';')
+	split_item2 = item2.split(';')
 	for i in range (0,3):
 		if split_item1[i] != 'x':
 			split_new_item[i] = split_item1[i]
 		if split_item2[i] != 'x':
 			split_new_item[i] = split_item2[i]
-	return ",".join(split_new_item)
+	return ";".join(split_new_item)
 
 def add_strobes(temporary_color_codes, color, ball_number, timestamp, strobe_end_time):
+	print("color", color, ball_number)
 	new_temporary_color_codes = temporary_color_codes
 	next_strobe_time=int(timestamp)
 	next_strobe_is_color=True
 	split_strobe_color_content = ['x','x','x']
 	split_strobe_color_content[ball_number] = color
-	strobe_color_content = ",".join(split_strobe_color_content)
+	strobe_color_content = ";".join(split_strobe_color_content)
 	split_strobe_black_content = ['x','x','x']
-	split_strobe_black_content[ball_number] = 'k'
-	strobe_black_content = ",".join(split_strobe_black_content)
-	while next_strobe_time<strobe_end_time:		
+	split_strobe_black_content[ball_number] = '0,0,0'
+	strobe_black_content = ";".join(split_strobe_black_content)
+	while next_strobe_time<strobe_end_time:	
+		print("color", color, ball_number, next_strobe_time)	
 		strobe_to_add = strobe_black_content						
 		if next_strobe_is_color:
 			strobe_to_add = strobe_color_content
@@ -332,15 +342,42 @@ def add_strobes(temporary_color_codes, color, ball_number, timestamp, strobe_end
 		next_strobe_time+=500	
 	return new_temporary_color_codes
 
+def calculate_fade(start_time,end_time,start_color,end_color):
+	print("jj",start_time,end_time,start_color,end_color)
+	fade_time_increment = 500
+	total_steps = int((end_time - start_time) / fade_time_increment)
+	fade_dictionary={}
+	start_color_r = int(start_color.split(",")[0])
+	start_color_g = int(start_color.split(",")[1])
+	start_color_b = int(start_color.split(",")[2])
+	end_color_r = int(end_color.split(",")[0])
+	end_color_g = int(end_color.split(",")[1])
+	end_color_b = int(end_color.split(",")[2])
+	step_size_r = (end_color_r - start_color_r) / total_steps 
+	step_size_g = (end_color_g - start_color_g) / total_steps 
+	step_size_b = (end_color_b - start_color_b) / total_steps 
+	# start_rgb_code=tuple(map(int,color_codes[start_color].split(",")))
+	# end_rgb_code=tuple(map(int,color_codes[end_color].split(",")))
+	current_step = 0
+	while current_step <= total_steps:		
+		new_r = int(start_color_r + (step_size_r*current_step))
+		new_g = int(start_color_g + (step_size_g*current_step))
+		new_b = int(start_color_b + (step_size_b*current_step))
+		color_fade_time = start_time + (fade_time_increment*current_step)
+		fade_dictionary[color_fade_time] = str(new_r) + "," + str(new_g) + "," + str(new_b)
+		current_step += 1
+	return fade_dictionary
+	print("fade_dictionary", fade_dictionary)
+#calculate_fade(0,20000,"255,127,0","0,0,0")
+
+
 def main():
 # creating a running loop
 	#redrawWindow()	
-	color_circle_colors=["k","k","k"]
+	color_circle_colors=["0,0,0","0,0,0","0,0,0"]
 	# Drawing Rectangle
 	global total_length
-	temporary_color_codes={
-	"1":"k,k,k"
-	}
+	temporary_color_codes={	"1":"0,0,0;0,0,0;0,0,0"	}
 	pygame.display.update()
 	text_file = "<No File Selected>"
 	formatted_song_length =show_details()
@@ -380,9 +417,10 @@ def main():
 		restartButton.draw (display, (0,0,0))
 
 		#green.draw(display)
+		#print("temporary_color_codes", temporary_color_codes)
 		draw_color_rects(temporary_color_codes)
 		draw_color_circles(color_circle_colors)
-		color_circle_colors = compare_current_time(temporary_color_codes,current_time_in_secs,color_circle_colors)
+		color_circle_colors = change_circle_and_real_colors_if_needed(temporary_color_codes,current_time_in_secs,color_circle_colors)
 		line_position=get_line_position(current_time_in_secs,total_length)
 		pygame.draw.line(display, (255,0,0),(line_position, 50), (line_position, 80), 5)
 		pygame.display.update()
@@ -390,8 +428,7 @@ def main():
 		# are occuring
 
     # Blit its surface onto the screen
-		for event in events:
-			
+		for event in events:			
 			pos = pygame.mouse.get_pos()			
 			if event.type == pygame.QUIT:
 				#print(file_name)
@@ -426,7 +463,7 @@ def main():
 				if letter_key_pressed in key_colors and mixer.music.get_busy():
 					content = key_colors[letter_key_pressed]
 					ball_numbers_used=[]
-					for ball_number,color_letter in enumerate(content.split(",")):
+					for ball_number,color_letter in enumerate(content.split(";")):
 						if color_letter!='x':
 							ball_numbers_used.append(ball_number)
 					timestamp = str(int(song_offset*1000) + pygame.mixer.music.get_pos())
@@ -439,18 +476,19 @@ def main():
 								if len(ball_numbers_used)>1:
 									del temporary_color_codes[key]
 								else:
-									split_value=value.split(',')
+									split_value=value.split(';')
 									split_value[ball_numbers_used[0]]="x"
-									temporary_color_codes[key]=",".join(split_value)
+									temporary_color_codes[key]=";".join(split_value)
 					if alt_pressed:
 						for ball in ball_numbers_used:
-							split_content = content.split(',')
+							split_content = content.split(';')
 							color = split_content[ball]
 							have_reached_timestamp = False
 							strobe_end_time = total_length*1000
 							for key in temporary_color_codes:
 								if have_reached_timestamp:
-									split_content = temporary_color_codes[key].split(',')
+									split_content = temporary_color_codes[key].split(';')
+									#print("split_content",split_content, ball)
 									this_keys_balls_color = split_content[ball]
 									if this_keys_balls_color != 'x':
 										strobe_end_time = int(key)
@@ -459,7 +497,54 @@ def main():
 									have_reached_timestamp = True
 							temporary_color_codes = add_strobes(temporary_color_codes, color, ball, timestamp, strobe_end_time)							
 
-					for ball_number,color_letter in enumerate(content.split(",")):
+					if ctrl_pressed:
+						new_fade_items_dicts = [{},{},{}]
+						print("timestamp",timestamp)
+						for ball in ball_numbers_used:
+							print("timestamp",timestamp)
+							fade_start_time = 0
+							fade_start_color = "0,0,0"
+							have_found_a_lower_key = False
+							split_content = content.split(';')
+							color = split_content[ball]
+							for key in reversed(temporary_color_codes):
+								if int(key) < int(timestamp):
+									have_found_a_lower_key = True
+								if have_found_a_lower_key:
+									split_content = temporary_color_codes[key].split(';')
+									print("hereee", split_content)
+									this_keys_balls_color = split_content[ball_number]
+									if this_keys_balls_color != 'x': 
+										fade_start_time = key
+										fade_start_color = this_keys_balls_color
+										break
+							new_fade_items_dicts[ball] = calculate_fade(int(fade_start_time),int(timestamp),fade_start_color,color)	
+						consolidated_dict = {}
+						for ball_number, indiv_ball_dict in enumerate(new_fade_items_dicts):
+							for key in indiv_ball_dict:
+								value = indiv_ball_dict[key]
+								current_value = 
+								#we need to get whatever is currently in consolidated dict for this key
+								# and then depending on the ball number add the indiv_ball_dict for that key
+								#sometimes we will need to split(and save) what is already in consolidated dict
+								#	and replace an x that is in it with the ball info from a new indiv_ball_dict
+								#our consolidated dict should build up like
+								# 255,255,0;x;x
+								# 255,255,0;255,255,0;x
+								# 255,255,0;255,255;255,255
+								# but not always, sometimes a fade will be on its own with a bunch of x
+								
+
+								if ball_number == 0:
+									consolidated_dict[key] = 
+							# temporary_color_codes = {k: new_fade_items.get(k, 0) + temporary_color_codes.get(k, 0) for k in set(new_fade_items) | set(temporary_color_codes)}				
+							# new_dict = Merge(new_fade_items, temporary_color_codes)
+							#print("new_fade_items",new_fade_items)
+							print("temporary_color_codes",temporary_color_codes)
+						
+						temporary_color_codes.update(new_fade_items)
+						print("temporary_color_codes2", temporary_color_codes)
+					for ball_number,color_letter in enumerate(content.split(";")):
 						if color_letter!='x':
 							change_real_color(color_letter,ball_number)
 							color_circle_colors[ball_number]=color_letter
@@ -550,16 +635,12 @@ def main():
 					pygame.mixer.music.stop()
 					textinput.update(events)
 					#textinput.value=''
-					temporary_color_codes={
-					"1":"k,k,k"
-					}
-					color_circle_colors=["k","k","k"]
+					temporary_color_codes={	"1":"0,0,0;0,0,0;0,0,0"	}
+					color_circle_colors=["0,0,0","0,0,0","0,0,0"]
 					song_offset=0
 					# x,y=pos
 					# x=0
-					# song_offset = get_song_position(x,total_length)
-
-					
+					# song_offset = get_song_position(x,total_length)					
 
 			if event.type == pygame.MOUSEMOTION:
 				if loadSongButton.isOver(pos):
@@ -580,19 +661,16 @@ def main():
 						
 						song_offset = get_song_position(x,total_length)
 				for ball_number in range(0,3):
-					print(song_offset*1000)
-					current_time_in_milisecs=int(song_offset*1000)
-	
-
+					#print(song_offset*1000)
+					click_time_in_ms=int(song_offset*1000)
 					have_found_a_lower_key=False
 					for key in reversed(temporary_color_codes):
-
-						if int(key) < current_time_in_milisecs:
+						if int(key) < click_time_in_ms:
 							have_found_a_lower_key = True
 						if have_found_a_lower_key:
-							split_content = temporary_color_codes[key].split(',')
+							split_content = temporary_color_codes[key].split(';')
 							this_keys_balls_color = split_content[ball_number]
-							if this_keys_balls_color != 'x':
+							if this_keys_balls_color != 'x': 
 								color = this_keys_balls_color
 								break
 					color_circle_colors[ball_number]=color

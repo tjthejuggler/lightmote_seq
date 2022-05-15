@@ -1,7 +1,10 @@
+hex codes need to be gotten programatically not from a dict
+
 
 you can out notification around save button if there is nothing to save and when the file saved
 todo:
   the ability to send color commands when paused
+  a way to set strobe speed
 
   get strobe working for all 3 balls, doing single bals should be more difficult, 
         and the solution will be similar to whatever we decide for the single ball strobe issue
@@ -39,9 +42,7 @@ todo:
 combıne mods for overwrıte strobe or maybe use right alt,ctrl
 
 bug
-  clıckıng ınto the mıddle of a color doesnt make the circies be set to that color
-    when the lıne ıs moved by mouse clıck, find the highest temp dict key(for each ball that isnt x) 
-        that is lower than it and set the circles and real ball colors to be those colors
+
 
 
 
