@@ -523,7 +523,7 @@ def main():
 						for ball_number, indiv_ball_dict in enumerate(new_fade_items_dicts):
 							for key in indiv_ball_dict:
 								value = indiv_ball_dict[key]
-								current_value = 
+								#current_value = 
 								#we need to get whatever is currently in consolidated dict for this key
 								# and then depending on the ball number add the indiv_ball_dict for that key
 								#sometimes we will need to split(and save) what is already in consolidated dict
@@ -535,8 +535,8 @@ def main():
 								# but not always, sometimes a fade will be on its own with a bunch of x
 								
 
-								if ball_number == 0:
-									consolidated_dict[key] = 
+								# if ball_number == 0:
+								# 	consolidated_dict[key] = 
 							# temporary_color_codes = {k: new_fade_items.get(k, 0) + temporary_color_codes.get(k, 0) for k in set(new_fade_items) | set(temporary_color_codes)}				
 							# new_dict = Merge(new_fade_items, temporary_color_codes)
 							#print("new_fade_items",new_fade_items)
