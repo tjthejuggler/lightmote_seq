@@ -77,10 +77,15 @@ textinput = pygame_textinput.TextInputVisualizer(manager=manager,font_object=tex
 	
 	
 
-def change_real_color(color_key, ball_number):
-	#print("color_key",color_key)
+def change_real_color(rgb_color, ball_number):
+	#print("rgb_color",rgb_color)
 	#print("hex_color_codes",hex_color_codes)
-	hex_color = hex_color_codes[color_key]
+
+	color_code = [ int(x) for x in rgb_color.split(',') ]
+	rgb_code=tuple(color_code)
+
+	hex_color = '#%02x%02x%02x' % rgb_code
+	#hex_color = hex_color_codes[rgb_color]
 	ip=''
 	if ball_number==0:#35,172,237
 		ip="85"#81,19,172,35,237,85
@@ -346,6 +351,8 @@ def calculate_fade(start_time,end_time,start_color,end_color):
 	print("jj",start_time,end_time,start_color,end_color)
 	fade_time_increment = 500
 	total_steps = int((end_time - start_time) / fade_time_increment)
+	if total_steps == 0:
+		total_steps = 1
 	fade_dictionary={}
 	start_color_r = int(start_color.split(",")[0])
 	start_color_g = int(start_color.split(",")[1])
@@ -512,8 +519,9 @@ def main():
 									have_found_a_lower_key = True
 								if have_found_a_lower_key:
 									split_content = temporary_color_codes[key].split(';')
-									print("hereee", split_content)
-									this_keys_balls_color = split_content[ball_number]
+									print("found lower key", split_content, ball_numbers_used, ball)
+									this_keys_balls_color = split_content[ball]
+									print("this_keys_balls_color", this_keys_balls_color)
 									if this_keys_balls_color != 'x': 
 										fade_start_time = key
 										fade_start_color = this_keys_balls_color
@@ -523,7 +531,12 @@ def main():
 						for ball_number, indiv_ball_dict in enumerate(new_fade_items_dicts):
 							for key in indiv_ball_dict:
 								value = indiv_ball_dict[key]
-								current_value = 
+								current_value = 'x;x;x'
+								if key in consolidated_dict:
+									current_value = consolidated_dict[key]
+								split_current_value = current_value.split(';')
+								split_current_value[ball_number] = indiv_ball_dict[key]
+								consolidated_dict[key] = ";".join(split_current_value)
 								#we need to get whatever is currently in consolidated dict for this key
 								# and then depending on the ball number add the indiv_ball_dict for that key
 								#sometimes we will need to split(and save) what is already in consolidated dict
@@ -535,14 +548,12 @@ def main():
 								# but not always, sometimes a fade will be on its own with a bunch of x
 								
 
-								if ball_number == 0:
-									consolidated_dict[key] = 
 							# temporary_color_codes = {k: new_fade_items.get(k, 0) + temporary_color_codes.get(k, 0) for k in set(new_fade_items) | set(temporary_color_codes)}				
 							# new_dict = Merge(new_fade_items, temporary_color_codes)
 							#print("new_fade_items",new_fade_items)
-							print("temporary_color_codes",temporary_color_codes)
+							#print("temporary_color_codes",temporary_color_codes)
 						
-						temporary_color_codes.update(new_fade_items)
+						temporary_color_codes.update(consolidated_dict)
 						print("temporary_color_codes2", temporary_color_codes)
 					for ball_number,color_letter in enumerate(content.split(";")):
 						if color_letter!='x':
