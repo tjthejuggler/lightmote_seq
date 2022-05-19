@@ -67,6 +67,10 @@ pygame.init()
 text_input_font = pygame.font.SysFont("comicsans", 15)
 manager = pygame_textinput.TextInputManager(validator = lambda input: len(input) <= 19)
 textinput = pygame_textinput.TextInputVisualizer(manager=manager,font_object=text_input_font)
+
+number_input_font = pygame.font.SysFont("comicsans", 15)
+manager = pygame_textinput.TextInputManager(validator = lambda input: len(input) <= 4)
+strobeinput = pygame_textinput.TextInputVisualizer(manager=manager,font_object=number_input_font)
 # def slide():
 # 	pass
 # #create music position slider
@@ -168,8 +172,11 @@ class color_circle():
 		self.color=color
 		self.x=x
 
-	def draw(self,win):
+	def draw(self,win,outline=None):
+		#pygame.draw.circle (display, outline,(self.x-2,348),74,)
 		pygame.draw.circle(display, self.color, (self.x, 350),70,0)
+		pygame.draw.circle(display, (0,0,0), (self.x, 350),71,2)
+
 
 def draw_color_rects(temporary_color_codes):
 	for key in temporary_color_codes:
@@ -258,6 +265,7 @@ loadButton = button((0,255,0), 1090, 5, 80, 30, 'LOAD')
 saveButton=button((0,255,0), 980, 5, 80, 30, 'Save')
 restartButton=button((0,255,0), 1090, 250, 80, 30, 'Restart')
 textinputButton=button((255,255,255), 790, 5, 160, 30, '')
+strobeinputButton=button((255,255,255), 710, 5, 50, 30, '')
 
 
 	
@@ -344,7 +352,7 @@ def add_strobes(temporary_color_codes, color, ball_number, timestamp, strobe_end
 			strobe_to_add = combine_dict_values_for_strobe(temporary_color_codes[next_strobe_time], strobe_to_add)
 		temporary_color_codes[next_strobe_time] = strobe_to_add
 		next_strobe_is_color = not next_strobe_is_color
-		next_strobe_time+=500	
+		next_strobe_time+=int(1000/float(strobeinput.value))	
 	return new_temporary_color_codes
 
 def calculate_fade(start_time,end_time,start_color,end_color):
@@ -376,7 +384,15 @@ def calculate_fade(start_time,end_time,start_color,end_color):
 	return fade_dictionary
 	print("fade_dictionary", fade_dictionary)
 #calculate_fade(0,20000,"255,127,0","0,0,0")
+def add_timestamp_to_temporary_color_codes(timestamp,temporary_color_codes,content):
+	
+	if timestamp in temporary_color_codes:
+		new_item=combine_dict_values_for_strobe(temporary_color_codes[timestamp],content)
+		temporary_color_codes[timestamp]=new_item
+	else:
+		temporary_color_codes[timestamp] = content
 
+	return temporary_color_codes
 
 def main():
 # creating a running loop
@@ -395,10 +411,12 @@ def main():
 	mixer.music.load('./MP3 Song File/'+current_song_name+'.mp3')
 	mixer.music.set_volume(0.8)
 	textinput.value='default'
+	strobeinput.value='2'
 	while True:
 		# print("song_offset",song_offset)
 		# print("pygame.mixer.music.get_pos()",pygame.mixer.music.get_pos())
 		textinput.value=textinput.value.strip()
+		strobeinput.value=strobeinput.value.strip()
 		temporary_color_codes = sort_dict(temporary_color_codes)
 		current_time_in_secs=song_offset + pygame.mixer.music.get_pos()/1000
 		minutes = math.floor(current_time_in_secs/60)
@@ -417,6 +435,8 @@ def main():
 		#display.blit(label, (760, 6))
 		textinputButton.draw (display, (0,0,0))
 		display.blit(textinput.surface, (790, 8))
+		strobeinputButton.draw (display, (0,0,0))
+		display.blit(strobeinput.surface, (710, 8))
 		loadSongButton.draw(display, (0,0,0))
 		loadButton.draw (display, (0,0,0))
 		#saveasButton.draw (display, (0,0,0))
@@ -444,6 +464,8 @@ def main():
 			#pygame.display.update()
 			# checking if keydown event happened or not
 			if event.type == pygame.KEYDOWN:
+				if strobeinputButton.isOver(pos) and not mixer.music.get_busy():
+					strobeinput.update(events)
 				if textinputButton.isOver(pos) and not mixer.music.get_busy():
 					textinput.update(events)
 				current=''
@@ -464,17 +486,19 @@ def main():
 				elif pygame.key.get_mods() & pygame.KMOD_ALT  and (pygame.key.name(event.key)!='left alt'):
 					print("pressed: alt + "+pygame.key.name(event.key))
 					alt_pressed=True
-					letter_key_pressed=pygame.key.name(event.key)
+					letter_key_pressed=pygame.key.name(event.key).lower()
 				else:
-					letter_key_pressed = str(event.unicode)
-				if letter_key_pressed in key_colors and mixer.music.get_busy():
+					letter_key_pressed = str(event.unicode).lower()
+
+				if letter_key_pressed in key_colors:
 					content = key_colors[letter_key_pressed]
 					ball_numbers_used=[]
 					for ball_number,color_letter in enumerate(content.split(";")):
 						if color_letter!='x':
 							ball_numbers_used.append(ball_number)
 					timestamp = str(int(song_offset*1000) + pygame.mixer.music.get_pos())
-					temporary_color_codes[timestamp] = content
+					temporary_color_codes=add_timestamp_to_temporary_color_codes(timestamp,temporary_color_codes,content)
+					#temporary_color_codes[timestamp] = content
 					temporary_color_codes = sort_dict(temporary_color_codes)
 					if shift_pressed:
 						for key in temporary_color_codes.copy():
@@ -589,6 +613,9 @@ def main():
 						formatted_song_length='{:02d}:{:02d}'.format(mins,secs)
 						#pygame.mixer.music.stop()
 						song_offset=0
+						notification_message('Song file succesfully loaded.')
+					else:
+						notification_message('You did not chose the song file.')
 				if loadButton.isOver(pos):
 					path_of_user_selected_file = prompt_file()
 					user_selected_file = path_of_user_selected_file.split("/")[-1]
@@ -601,6 +628,9 @@ def main():
 						#print('file exists')		
 						with open(path_of_user_selected_file) as json_file:
 							temporary_color_codes = json.load(json_file)
+						notification_message('Text file succesfully loaded.')
+					else:
+						notification_message('You did not chose the text file.')
 				# if saveasButton.isOver(pos):
 				# 	text_file = asksaveasfile(initialfile = 'Untitled.txt',defaultextension=".txt",filetypes=[("All Files","*.*"),("Text Documents","*.txt")])
 				# 	if text_file is not None:
@@ -616,11 +646,15 @@ def main():
 						textfile_path= './texts/'+textinput.value+'.txt'
 						with open(textfile_path, 'w') as fp:
 							json.dump(temporary_color_codes, fp,indent = 6)
+						notification_message('File succesfully saved.')
+					else:
+						notification_message('There is nothing to save.')
 				#notification must have text in textinput
 					
 				if restartButton.isOver(pos):
 					pygame.mixer.music.stop()
 					textinput.update(events)
+					strobeinput.update(events)
 					#textinput.value=''
 					temporary_color_codes={	"1":"0,0,0;0,0,0;0,0,0"	}
 					color_circle_colors=["0,0,0","0,0,0","0,0,0"]
@@ -659,7 +693,8 @@ def main():
 							this_keys_balls_color = split_content[ball_number]
 							if this_keys_balls_color != 'x': 
 								color = this_keys_balls_color
+								color_circle_colors[ball_number]=color
+								change_real_color(color,ball_number)
 								break
-					color_circle_colors[ball_number]=color
-					change_real_color(color,ball_number)
+					
 main()
