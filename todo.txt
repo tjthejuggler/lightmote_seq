@@ -1,15 +1,11 @@
 todo:
-  the ability to send color commands when paused
-  a way to set strobe speed
-  borders around circles
-  you can put notification around save button if there is nothing to save and when the file saved
   test with real balls
   if a ball is already red and we make it red again, there should be some indication of this
     a little red line barely sticking out of the top covering the border
   clean code, remove prints, make functions when we can, fix variable names so they are like comments
 
 bug
-  reset is crashing - is it still?
+
 
 think about
   combıne mods for overwrıte strobe or maybe use right alt,ctrl
