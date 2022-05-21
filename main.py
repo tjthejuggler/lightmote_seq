@@ -160,13 +160,13 @@ class color_rect():
 		self.y=y
 		self.length=length
 
-	def draw(self,win):
+	def draw(self,win, need_line):
 		outline=(255,255,255)
 	#Call this method to draw the button on the screen
 		#print(self.color)
 		pygame.draw.rect(display, self.color, (self.x, self.y, self.length, 30))
-			# if need_line:
-			# 	pygame.draw.line(display, self.color,(self.x+2, self.y), (self.x+2,self.y-10),5)
+		if need_line and self.x > 22:
+			pygame.draw.line(display, self.color,(self.x+2, self.y), (self.x+2,self.y-10),5)
 
 class color_circle():
 	def __init__(self, color, x):
@@ -180,7 +180,7 @@ class color_circle():
 
 
 def draw_color_rects(temporary_color_codes):
-	#previous_this_rgb_code=[(0,0,0),(0,0,0),(0,0,0)]
+	previous_this_rgb_code=[(0,0,0),(0,0,0),(0,0,0)]
 	for key in temporary_color_codes:
 		value = temporary_color_codes[key]
 		#print("value",value)
@@ -202,8 +202,8 @@ def draw_color_rects(temporary_color_codes):
 				line_position=get_line_position(float(key)/1000,total_length)
 				this_length = (bar_length+20)-line_position
 				this_color_rect = color_rect(this_rgb_code, line_position, y_cord,this_length)
-				this_color_rect.draw(display)#,this_rgb_code==previous_this_rgb_code[ball_number]
-				#previous_this_rgb_code[ball_number]=this_rgb_code
+				this_color_rect.draw(display,this_rgb_code==previous_this_rgb_code[ball_number])
+				previous_this_rgb_code[ball_number]=this_rgb_code
 
 def draw_color_circles(colors):#colors=lıst
 	for ball_number,color_code in enumerate(colors):
@@ -573,7 +573,6 @@ def main():
 							if key in temporary_color_codes:
 								fade_item_to_add = combine_dict_values_for_strobe(temporary_color_codes[key], fade_item_to_add)
 							temporary_color_codes[key] = fade_item_to_add
-						#temporary_color_codes.update(consolidated_dict)
 						print("temporary_color_codes2", temporary_color_codes)
 						
 					for ball_number,color_letter in enumerate(content.split(";")):
