@@ -165,7 +165,8 @@ class color_rect():
 	#Call this method to draw the button on the screen
 		#print(self.color)
 		pygame.draw.rect(display, self.color, (self.x, self.y, self.length, 30))
-		#pygame.draw.line(display, (255,0,0),(22, 50), (22, 80), 5)
+		# if need_line:
+		# 	pygame.draw.line(display, self.color,(self.x+2, self.y), (self.x+2,self.y-10),5)
 
 class color_circle():
 	def __init__(self, color, x):
@@ -179,14 +180,17 @@ class color_circle():
 
 
 def draw_color_rects(temporary_color_codes):
+	#previous_this_rgb_code=[(0,0,0),(0,0,0),(0,0,0)]
 	for key in temporary_color_codes:
 		value = temporary_color_codes[key]
 		#print("value",value)
+		
 		for ball_number,color_code in enumerate(value.split(";")):
 			if color_code!='x':	
 				#print("color_code",color_code)
 				color_code = [ int(x) for x in color_code.split(',') ]
 				this_rgb_code=tuple(color_code)
+				
 				#print("this_rgb_code",this_rgb_code)
 				y_cord =0
 				if ball_number==0:
@@ -198,7 +202,8 @@ def draw_color_rects(temporary_color_codes):
 				line_position=get_line_position(float(key)/1000,total_length)
 				this_length = (bar_length+20)-line_position
 				this_color_rect = color_rect(this_rgb_code, line_position, y_cord,this_length)
-				this_color_rect.draw(display)
+				this_color_rect.draw(display)#,this_rgb_code==previous_this_rgb_code[ball_number]
+				#previous_this_rgb_code[ball_number]=this_rgb_code
 
 def draw_color_circles(colors):#colors=lıst
 	for ball_number,color_code in enumerate(colors):
