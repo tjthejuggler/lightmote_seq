@@ -21,7 +21,7 @@ import struct
 from tkinter.filedialog import asksaveasfile
 from tkinter import *
 import pygame_textinput
-from notifypy import Notify
+#from notifypy import Notify
 
 
 udp_header = struct.pack("!bIBH", 66, 0, 0, 0)
@@ -56,11 +56,11 @@ if path.exists('./hex_color_codes.txt'):
 
 
 parser = argparse.ArgumentParser()
-parser.add_argument("prompt", help="the base prompt (comma seperate each weighted section")
+parser.add_argument("songname", help="enter the name of the song(mp3 must be in song folder)")
 #parser.add_argument("songname", help="enter the name of the song")
 args = parser.parse_args()
 #song_name=args.songname
-user_input = args.prompt
+user_input = args.songname
 
 pygame.init()
 
@@ -102,11 +102,15 @@ def change_real_color(rgb_color, ball_number):
 	s.sendto(udp_header+data, ('192.168.43.'+ip, 41412))
 	#("ball with ip "+ ip + " " + hex_color )
 
+# def notification_message(message):
+# 	notification = Notify()
+# 	notification.title = "Juggling Balls"
+# 	notification.message = message
+# 	notification.send()
+
 def notification_message(message):
-	notification = Notify()
-	notification.title = "Juggling Balls"
-	notification.message = message
-	notification.send()
+    msg = "notify-send ' ' '"+message+"'"
+    os.system(msg)
 
 def prompt_file():
     #"""Create a Tk file dialog and cleanup when finished"""
